@@ -133,8 +133,7 @@ Lemma Op_double_subproof n :
 Proof. rewrite -muln2 /=; lia. Qed.
 
 Instance Op_double : UnOp double :=
-  {| TUOp := fun x => Z.mul x 2;
-     TUOpInj := Op_double_subproof |}.
+  {| TUOp := fun x => Z.mul x 2; TUOpInj := Op_double_subproof |}.
 Add UnOp Op_double.
 
 (* missing (but cannot be handled by Micromega): *)
@@ -173,16 +172,26 @@ Instance Op_modn : BinOp modn :=
   {| TBOp := Z.rem; TBOpInj := Op_modn_subproof |}.
 Add BinOp Op_modn.
 
+Lemma Op_dvdn_subproof n m :
+  Z_of_bool (n %| m) = isZero (Z.rem (Z.of_nat m) (Z.of_nat n)).
+Proof. rewrite /dvdn; lia. Qed.
+
+Instance Op_dvdn : BinOp dvdn :=
+  {| TBOp := fun x y => isZero (Z.rem y x); TBOpInj := Op_dvdn_subproof |}.
+Add BinOp Op_dvdn.
+
 Lemma Op_odd_subproof n : Z_of_bool (odd n) = Z.modulo (Z.of_nat n) 2.
 Proof. rewrite -Z_of_nat_of_boolE -modn2; lia. Qed.
 
 Instance Op_odd : UnOp odd :=
   {| TUOp := fun x => Z.modulo x 2; TUOpInj := Op_odd_subproof |}.
+Add UnOp Op_odd.
 
 Lemma Op_half_subproof n : Z.of_nat n./2 = Z.div (Z.of_nat n) 2.
 Proof. rewrite -divn2; lia. Qed.
 
 Instance Op_half : UnOp half :=
   {| TUOp := fun x => Z.div x 2; TUOpInj := Op_half_subproof |}.
+Add UnOp Op_half.
 
 End zify.
