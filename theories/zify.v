@@ -7,6 +7,15 @@ Ltac Zify.zify_post_hook ::= Z.to_euclidean_division_equations.
 Ltac zify ::=
   unfold is_true in *; zify_op; (iter_specs applySpec); zify_post_hook.
 
+(* missing instances *)
+Instance Op_isZero : UnOp isZero :=
+  { TUOp := isZero; TUOpInj := fun _ => erefl }.
+Add UnOp Op_isZero.
+
+Instance Op_isLeZero : UnOp isLeZero :=
+  { TUOp := isLeZero; TUOpInj := fun _ => erefl }.
+Add UnOp Op_isLeZero.
+
 Module zify.
 
 Local Delimit Scope Z_scope with Z.
@@ -57,6 +66,12 @@ Add UnOp Op_Z_of_bool.
 (* nat                                                                        *)
 (******************************************************************************)
 
+Instance Op_eqn : BinOp eqn := Op_nat_eqb.
+Add BinOp Op_eqn.
+
+Instance Op_eq_op_nat : BinOp (@eq_op nat_eqType) := Op_eqn.
+Add BinOp Op_eq_op_nat.
+
 Instance Op_addn_rec : BinOp addn_rec := Op_plus.
 Add BinOp Op_addn_rec.
 
@@ -74,12 +89,6 @@ Add BinOp Op_muln_rec.
 
 Instance Op_muln : BinOp muln := Op_mul.
 Add BinOp Op_muln.
-
-Instance Op_eqn : BinOp eqn := Op_nat_eqb.
-Add BinOp Op_eqn.
-
-Instance Op_eq_op_nat : BinOp (@eq_op nat_eqType) := Op_eqn.
-Add BinOp Op_eq_op_nat.
 
 Lemma nat_lebE n m : (n <= m) = Nat.leb n m.
 Proof. by elim: n m => // n ih [|m] //=; rewrite -ih. Qed.
@@ -201,7 +210,7 @@ Add UnOp Op_half.
 (* Print lcmn. *)
 
 (******************************************************************************)
-(* ssrint and intdiv                                                          *)
+(* ssrint                                                                     *)
 (******************************************************************************)
 
 Section ssrint.
@@ -210,8 +219,7 @@ Import GRing.Theory Num.Theory.
 
 Definition Z_of_int (n : int) : Z :=
   match n with
-  | Posz 0 => Z0
-  | Posz n'.+1 => Zpos (Pos.of_succ_nat n')
+  | Posz n => Z.of_nat n
   | Negz n' => Zneg (Pos.of_succ_nat n')
   end.
 
@@ -220,6 +228,10 @@ Instance Inj_int_Z : InjTyp int Z :=
 Add InjTyp Inj_int_Z.
 
 Canonical Inj_int_Z. (* Z_of_int =? inj _ *)
+
+Instance Op_Z_of_int : UnOp Z_of_int :=
+  { TUOp := id : Z -> Z; TUOpInj := ltac:(by []) }.
+Add UnOp Op_Z_of_int.
 
 Instance Op_Posz : UnOp Posz := mkuop _ _ _ Posz _ _ id (fun _ => erefl).
 Add UnOp Op_Posz.
@@ -232,14 +244,19 @@ Instance Op_Negz : UnOp Negz :=
 Add UnOp Op_Negz.
 
 Lemma Op_eq_int_subproof n m : n = m <-> Z_of_int n = Z_of_int m.
-Proof. case: n m => [[|n]|n][[|m]|m]; split => //= -[] ?; f_equal; lia. Qed.
+Proof. split=> [->|] //; case: n m => ?[]? /= ?; f_equal; lia. Qed.
 
 Instance Op_eq_int : BinRel (@eq int) :=
-  {TR := @eq Z; TRInj := Op_eq_int_subproof }.
+  { TR := @eq Z; TRInj := Op_eq_int_subproof }.
 Add BinRel Op_eq_int.
 
-Instance Op_Z_of_int : UnOp Z_of_int := { TUOp := id; TUOpInj := ltac:(by []) }.
-Add UnOp Op_Z_of_int.
+Lemma Op_eq_op_int_subproof (n m : int) :
+  Z_of_bool (n == m) = isZero (Z_of_int n - Z_of_int m).
+Proof. case: n m => ?[]? //; rewrite /eq_op [LHS]/= /eq_op [LHS]/=; lia. Qed.
+
+Instance Op_eq_op_int : BinOp (@eq_op int_eqType) :=
+  { TBOp := fun x y => isZero (x - y); TBOpInj := Op_eq_op_int_subproof }.
+Add BinOp Op_eq_op_int.
 
 Instance Op_0_int : CstOp 0%R :=
   {| TCst := 0%Z; TCstInj := (erefl _ : Z_of_int 0%R = 0%Z) |}.
@@ -257,7 +274,7 @@ Instance Op_add_int : BinOp +%R := Op_addz.
 Add BinOp Op_add_int.
 
 Lemma Op_oppz_subproof n : Z_of_int (intZmod.oppz n) = (- Z_of_int n)%Z.
-Proof. case: n=> [[|n]|n]; rewrite /intZmod.oppz; lia. Qed.
+Proof. case: n=> [[|?]|?]; rewrite /intZmod.oppz; lia. Qed.
 
 Instance Op_oppz : UnOp intZmod.oppz :=
   {| TUOp := Z.opp; TUOpInj := Op_oppz_subproof |}.
@@ -272,7 +289,7 @@ Add CstOp Op_1_int.
 
 Lemma Op_mulz_subproof n m :
   Z_of_int (intRing.mulz n m) = (Z_of_int n * Z_of_int m)%Z.
-Proof. case: n m => []n[]m; rewrite /intRing.mulz; nia. Qed.
+Proof. case: n m => ?[]?; rewrite /intRing.mulz; nia. Qed.
 
 Instance Op_mulz : BinOp intRing.mulz :=
   {| TBOp := Z.mul; TBOpInj := Op_mulz_subproof |}.
@@ -323,20 +340,72 @@ Instance Op_int_inv : UnOp GRing.inv := Op_invz.
 Add UnOp Op_int_inv.
 
 Lemma Op_absz_subproof n : Z.of_nat (absz n) = Z.abs (Z_of_int n).
-Proof. case: n => [[|n]|n] /=; lia. Qed.
+Proof. case: n => ? /=; lia. Qed.
 
 Instance Op_absz : UnOp absz :=
   { TUOp := Z.abs; TUOpInj := Op_absz_subproof }.
+Add UnOp Op_absz.
 
-(* Print intOrdered.lez. *)
-(* Print intOrdered.ltz. *)
-(* Print Num.le. *)
-(* Print Num.lt. *)
+Lemma Op_int_normr_subproof (n : int) : Z_of_int `|n|%R = Z.abs (Z_of_int n).
+Proof. rewrite /Num.norm /=; lia. Qed.
+
+Instance Op_int_normr : UnOp Num.norm :=
+  { TUOp := Z.abs; TUOpInj := Op_int_normr_subproof }.
+Add UnOp Op_int_normr.
+
+Lemma Op_lez_subproof n m :
+  Z_of_bool (intOrdered.lez n m) = isLeZero (Z_of_int n - Z_of_int m).
+Proof. case: n m => ?[]?; rewrite [LHS]/=; lia. Qed.
+
+Instance Op_lez : BinOp intOrdered.lez :=
+  {| TBOp := fun x y => isLeZero (x - y)%Z; TBOpInj := Op_lez_subproof |}.
+Add BinOp Op_lez.
+
+Instance Op_int_ler : BinOp Num.le := Op_lez.
+Add BinOp Op_int_ler.
+
+Lemma Op_ltz_subproof n m :
+  Z_of_bool (intOrdered.ltz n m) = isLeZero (Z_of_int n + 1 - Z_of_int m).
+Proof. case: n m => ?[]?; rewrite [LHS]/=; lia. Qed.
+
+Instance Op_ltz : BinOp intOrdered.ltz :=
+  {| TBOp := fun x y => isLeZero (x + 1 - y)%Z; TBOpInj := Op_ltz_subproof |}.
+Add BinOp Op_ltz.
+
+Instance Op_int_ltr : BinOp Num.lt := Op_ltz.
+Add BinOp Op_int_ltr.
+
 (* Print Num.Def.lerif. *)
-(* Print Num.sg. *)
-(* Print Num.min. *)
-(* Print Num.max. *)
+
+Lemma Op_int_sgr_subproof n : Z_of_int (Num.sg n) = Z.sgn (Z_of_int n).
+Proof. by case: n => [[]|]. Qed.
+
+Instance Op_int_sgr : UnOp Num.sg :=
+  {| TUOp := Z.sgn; TUOpInj := Op_int_sgr_subproof |}.
+Add UnOp Op_int_sgr.
+
+Lemma Op_int_min_subproof n m :
+  Z_of_int (Num.min n m) = Z.min (Z_of_int n) (Z_of_int m).
+Proof. case: minrP; lia. Qed.
+
+Instance Op_int_min : BinOp Num.min :=
+  {| TBOp := Z.min; TBOpInj := Op_int_min_subproof |}.
+Add BinOp Op_int_min.
+
+Lemma Op_int_max_subproof n m :
+  Z_of_int (Num.max n m) = Z.max (Z_of_int n) (Z_of_int m).
+Proof. case: maxrP; lia. Qed.
+
+Instance Op_int_max : BinOp Num.max :=
+  {| TBOp := Z.max; TBOpInj := Op_int_max_subproof |}.
+Add BinOp Op_int_max.
 
 End ssrint.
+
+(******************************************************************************)
+(* intdiv                                                                     *)
+(******************************************************************************)
+
+
 
 End zify.
