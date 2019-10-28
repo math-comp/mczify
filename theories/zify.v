@@ -194,6 +194,13 @@ Instance Op_half : UnOp half :=
   {| TUOp := fun x => (x / 2)%Z; TUOpInj := Op_half_subproof |}.
 Add UnOp Op_half.
 
+Lemma Op_uphalf_subproof n : Z.of_nat (uphalf n) = ((Z.of_nat n + 1) / 2)%Z.
+Proof. rewrite uphalf_half; lia. Qed.
+
+Instance Op_uphalf : UnOp uphalf :=
+  {| TUOp := fun x => ((x + 1) / 2)%Z; TUOpInj := Op_uphalf_subproof |}.
+Add UnOp Op_uphalf.
+
 Lemma Op_gcdn_subproof n m :
   Z.of_nat (gcdn n m) = Z.gcd (Z.of_nat n) (Z.of_nat m).
 Proof.
@@ -512,6 +519,7 @@ Add BinOp  zify.Op_modn.
 Add BinOp  zify.Op_dvdn.
 Add UnOp   zify.Op_odd.
 Add UnOp   zify.Op_half.
+Add UnOp   zify.Op_uphalf.
 Add BinOp  zify.Op_gcdn.
 Add BinOp  zify.Op_lcmn.
 Add BinOp  zify.Op_coprime.
