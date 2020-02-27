@@ -1,4 +1,3 @@
 theories/zify.v
 
 -R theories mathcomp.zify
--R /home/i/wrk/math-comp/mathcomp mathcomp
