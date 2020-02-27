@@ -2,7 +2,8 @@ From Coq Require Import ZArith ZifyClasses Zify ZifyBool.
 From Coq Require Export Lia.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq path.
 From mathcomp Require Import div choice fintype tuple finfun bigop finset prime.
-From mathcomp Require Import binomial ssralg countalg ssrnum ssrint rat intdiv.
+From mathcomp Require Import order binomial ssralg countalg ssrnum ssrint rat.
+From mathcomp Require Import intdiv.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -10,11 +11,11 @@ Unset Printing Implicit Defensive.
 
 Ltac zify ::=
   unfold is_true in *; do ?rewrite -> unfold_in in *;
-  zify_op; (iter_specs applySpec); zify_post_hook.
+  zify_op; (zify_iter_specs applySpec); zify_post_hook.
 
 Module MathcompZifyInstances.
 
-Import GRing.Theory Num.Theory.
+Import Order.Theory GRing.Theory Num.Theory.
 
 Local Delimit Scope Z_scope with Z.
 
@@ -324,7 +325,7 @@ Add UnOp Op_int_sgr.
 
 Lemma Op_int_min_subproof n m :
   Z_of_int (Num.min n m) = Z.min (Z_of_int n) (Z_of_int m).
-Proof. case: minrP; lia. Qed.
+Proof. case: leP; lia. Qed.
 
 Instance Op_int_min : BinOp Num.min :=
   {| TBOp := Z.min; TBOpInj := Op_int_min_subproof |}.
@@ -332,7 +333,7 @@ Add BinOp Op_int_min.
 
 Lemma Op_int_max_subproof n m :
   Z_of_int (Num.max n m) = Z.max (Z_of_int n) (Z_of_int m).
-Proof. case: maxrP; lia. Qed.
+Proof. case: leP; lia. Qed.
 
 Instance Op_int_max : BinOp Num.max :=
   {| TBOp := Z.max; TBOpInj := Op_int_max_subproof |}.
