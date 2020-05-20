@@ -1,4 +1,4 @@
-From Coq Require Import ZArith ZifyClasses Zify ZifyBool.
+From Coq Require Import ZArith ZifyClasses Zify ZifyInst ZifyBool.
 From Coq Require Export Lia.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq path.
 From mathcomp Require Import div choice fintype tuple finfun bigop finset prime.
@@ -10,8 +10,12 @@ Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
 Ltac zify ::=
+  intros;
   unfold is_true in *; do ?rewrite -> unfold_in in *;
-  zify_op; (zify_iter_specs applySpec); zify_post_hook.
+  zify_elim_let;
+  zify_op;
+  zify_iter_specs;
+  zify_saturate; zify_post_hook.
 
 Module MathcompZifyInstances.
 
@@ -81,7 +85,7 @@ Instance Op_muln : BinOp muln := Op_mul.
 Add BinOp Op_muln.
 
 Lemma nat_lebE n m : (n <= m) = Nat.leb n m.
-Proof. by elim: n m => // n ih [|m] //=; rewrite -ih. Qed.
+Proof. by elim: n m => [|n ih []]. Qed.
 
 Instance Op_leq : BinOp leq :=
   { TBOp := fun x y => isLeZero (x - y)%Z;
@@ -103,7 +107,7 @@ Add BinOp Op_gtn.
 
 Lemma Op_minn_subproof n m :
   Z.of_nat (minn n m) = Z.min (Z.of_nat n) (Z.of_nat m).
-Proof. rewrite /minn /=; case: leqP; lia. Qed.
+Proof. case: leqP; lia. Qed.
 
 Instance Op_minn : BinOp minn :=
   {| TBOp := Z.min; TBOpInj := Op_minn_subproof |}.
@@ -111,7 +115,7 @@ Add BinOp Op_minn.
 
 Lemma Op_maxn_subproof n m :
   Z.of_nat (maxn n m) = Z.max (Z.of_nat n) (Z.of_nat m).
-Proof. rewrite /maxn /=; case: leqP; lia. Qed.
+Proof. case: leqP; lia. Qed.
 
 Instance Op_maxn : BinOp maxn :=
   {| TBOp := Z.max; TBOpInj := Op_maxn_subproof |}.
@@ -184,7 +188,7 @@ Add BinRel Op_eq_int.
 
 Lemma Op_eq_op_int_subproof (n m : int) :
   Z_of_bool (n == m) = isZero (Z_of_int n - Z_of_int m).
-Proof. case: n m => ?[]? //; rewrite /eq_op [LHS]/= /eq_op [LHS]/=; lia. Qed.
+Proof. case: n m => ? [] ? //; do 2 rewrite /eq_op /=; lia. Qed.
 
 Instance Op_eq_op_int : BinOp (@eq_op int_eqType) :=
   (* { TBOp := fun x y => isZero (x - y); TBOpInj := Op_eq_op_int_subproof }. *)
@@ -257,9 +261,7 @@ Lemma Op_int_scale_subproof (n : int) (m : int^o) :
 Proof. rewrite /GRing.scale /=; lia. Qed.
 
 Instance Op_int_scale : BinOp (@GRing.scale _ [lmodType int of int^o]) :=
-  (* {| TBOp := Z.mul; TBOpInj := Op_int_scale_subproof |}. *)
-  mkbop int int int Z (@GRing.scale _ (GRing.regular_lmodType int_Ring))
-        Inj_int_Z Inj_int_Z Inj_int_Z Z.mul Op_int_scale_subproof.
+  Op_mulz.
 Add BinOp Op_int_scale.
 
 Lemma Op_int_exp_subproof n m :
@@ -402,9 +404,9 @@ suff: let n := int_of_Z n in
         & m = 0 -> divz n m = 0]%R
   by case=> hpos hneg h0; split => [{hneg h0}|{hpos}]; lia.
 move: (int_of_Z n) (int_of_Z m) => {}n {}m /=; split => hm.
-- rewrite -(addr0 (_ * m)%R) mulrDl mul1r {2 3}(divz_eq n m).
+- rewrite -[(_ * m)%R]addr0 mulrDl mul1r {2 3}(divz_eq n m).
   rewrite ler_add2l ltr_add2l ltz_pmod // modz_ge0; lia.
-- rewrite -(addr0 (divz _ _ * _)%R) mulrDl mulN1r {2 3}(divz_eq n m).
+- rewrite -[(divz _ _ * _)%R]addr0 mulrDl mulN1r {2 3}(divz_eq n m).
   rewrite ler_add2l ltr_add2l -modzN ltz_pmod ?modz_ge0; lia.
 - by rewrite hm divz0.
 Qed.
