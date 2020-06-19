@@ -549,7 +549,7 @@ Add Zify BinOp Op_modn.
 
 Instance Op_dvdn : BinOp dvdn :=
   { TBOp := fun x y => Z.eqb (modZ y x) 0%Z;
-    TBOpInj := ltac:(rewrite /dvdn; lia)}.
+    TBOpInj := ltac:(rewrite /dvdn; lia) }.
 Add Zify BinOp Op_dvdn.
 
 Instance Op_odd : UnOp odd :=
@@ -618,6 +618,58 @@ Instance Op_coprimez : BinOp coprimez :=
   { TBOp := fun x y => Z.eqb (Z.gcd x y) 1%Z;
     TBOpInj := ltac:(rewrite /= /coprimez; lia) }.
 Add Zify BinOp Op_coprimez.
+
+(******************************************************************************)
+(* natdvd                                                                     *)
+(******************************************************************************)
+
+Instance Op_natdvd_le : BinOp (<=%O : rel natdvd) := Op_dvdn.
+Add Zify BinOp Op_natdvd_le.
+
+Instance Op_natdvd_le' : BinOp (>=^d%O : rel natdvd^d) := Op_dvdn.
+Add Zify BinOp Op_natdvd_le'.
+
+Instance Op_natdvd_ge : BinOp ((>=%O : rel natdvd) : nat -> nat -> bool) :=
+  { TBOp := fun x y => Z.eqb (modZ x y) 0%Z;
+    TBOpInj := ltac:(simpl; lia) }.
+Add Zify BinOp Op_natdvd_ge.
+
+Instance Op_natdvd_ge' : BinOp (<=^d%O : rel natdvd^d) := Op_natdvd_ge.
+Add Zify BinOp Op_natdvd_ge'.
+
+Instance Op_natdvd_lt : BinOp ((<%O : rel natdvd) : nat -> nat -> bool) :=
+  { TBOp := fun x y => negb (Z.eqb y x) && Z.eqb (modZ y x) 0%Z;
+    TBOpInj := ltac:(move=> ? ? /=; rewrite sdvdEnat; lia) }.
+Add Zify BinOp Op_natdvd_lt.
+
+Instance Op_natdvd_lt' : BinOp (>^d%O : rel natdvd^d) := Op_natdvd_lt.
+Add Zify BinOp Op_natdvd_lt'.
+
+Instance Op_natdvd_gt : BinOp ((>%O : rel natdvd) : nat -> nat -> bool) :=
+  { TBOp := fun x y => negb (Z.eqb x y) && Z.eqb (modZ x y) 0%Z;
+    TBOpInj := ltac:(move=> ? ? /=; rewrite sdvdEnat; lia) }.
+Add Zify BinOp Op_natdvd_gt.
+
+Instance Op_natdvd_gt' : BinOp (<^d%O : rel natdvd^d) := Op_natdvd_gt.
+Add Zify BinOp Op_natdvd_gt'.
+
+(* missing: min and max for natdvd *)
+
+Instance Op_natdvd_meet : BinOp (Order.meet : natdvd -> _) := Op_gcdn.
+Add Zify BinOp Op_natdvd_meet.
+
+Instance Op_natdvd_meet' : BinOp (Order.join : natdvd^d -> _) := Op_gcdn.
+Add Zify BinOp Op_natdvd_meet'.
+
+Instance Op_natdvd_join : BinOp (Order.join : natdvd -> _) := Op_lcmn.
+Add Zify BinOp Op_natdvd_join.
+
+Instance Op_natdvd_join' : BinOp (Order.meet : natdvd^d -> _) := Op_lcmn.
+Add Zify BinOp Op_natdvd_join'.
+
+Instance Op_natdvd_bottom : CstOp (0%O : natdvd) :=
+  { TCst := 1%Z; TCstInj := erefl }.
+Add Zify CstOp Op_natdvd_bottom.
 
 (* missing: definitions in prime and binomial *)
 
@@ -746,4 +798,17 @@ Add Zify BinOp Op_lcmn.
 Add Zify BinOp Op_coprime.
 Add Zify BinOp Op_gcdz.
 Add Zify BinOp Op_coprimez.
+Add Zify BinOp Op_natdvd_le.
+Add Zify BinOp Op_natdvd_le'.
+Add Zify BinOp Op_natdvd_ge.
+Add Zify BinOp Op_natdvd_ge'.
+Add Zify BinOp Op_natdvd_lt.
+Add Zify BinOp Op_natdvd_lt'.
+Add Zify BinOp Op_natdvd_gt.
+Add Zify BinOp Op_natdvd_gt'.
+Add Zify BinOp Op_natdvd_meet.
+Add Zify BinOp Op_natdvd_meet'.
+Add Zify BinOp Op_natdvd_join.
+Add Zify BinOp Op_natdvd_join'.
+Add Zify CstOp Op_natdvd_bottom.
 End Exports.
