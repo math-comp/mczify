@@ -80,17 +80,35 @@ Add BinOp Op_bool_gt.
 Instance Op_bool_gt' : BinOp (<^d%O : rel bool^d) := Op_bool_gt.
 Add BinOp Op_bool_gt'.
 
-Instance Op_bool_min : BinOp (Order.meet : bool -> bool -> bool) := Op_andb.
+Instance Op_bool_min : BinOp (Order.min : bool -> bool -> bool) :=
+  { TBOp := Z.min; TBOpInj := ltac:(by case=> [][]) }.
 Add BinOp Op_bool_min.
 
-Instance Op_bool_min' : BinOp (Order.join : bool^d -> _) := Op_andb.
+Instance Op_bool_min' :
+  BinOp ((Order.max : bool^d -> _) : bool -> bool -> bool) :=
+  { TBOp := Z.min; TBOpInj := ltac:(by case=> [][]) }.
 Add BinOp Op_bool_min'.
 
-Instance Op_bool_max : BinOp (Order.join : bool -> bool -> bool) := Op_orb.
+Instance Op_bool_max : BinOp (Order.max : bool -> bool -> bool) :=
+  { TBOp := Z.max; TBOpInj := ltac:(by case=> [][]) }.
 Add BinOp Op_bool_max.
 
-Instance Op_bool_max' : BinOp (Order.meet : bool^d -> _) := Op_orb.
+Instance Op_bool_max' :
+  BinOp ((Order.min : bool^d -> _) : bool -> bool -> bool) :=
+  { TBOp := Z.max; TBOpInj := ltac:(by case=> [][]) }.
 Add BinOp Op_bool_max'.
+
+Instance Op_bool_meet : BinOp (Order.meet : bool -> bool -> bool) := Op_andb.
+Add BinOp Op_bool_meet.
+
+Instance Op_bool_meet' : BinOp (Order.join : bool^d -> _) := Op_andb.
+Add BinOp Op_bool_meet'.
+
+Instance Op_bool_join : BinOp (Order.join : bool -> bool -> bool) := Op_orb.
+Add BinOp Op_bool_join.
+
+Instance Op_bool_join' : BinOp (Order.meet : bool^d -> _) := Op_orb.
+Add BinOp Op_bool_join'.
 
 Instance Op_bool_bottom : CstOp (0%O : bool) := Op_false.
 Add CstOp Op_bool_bottom.
@@ -214,17 +232,31 @@ Add BinOp Op_nat_gt.
 Instance Op_nat_gt' : BinOp (<^d%O : rel nat^d) := Op_gtn.
 Add BinOp Op_nat_gt'.
 
-Instance Op_nat_min : BinOp (Order.meet : nat -> _) := Op_minn.
+Instance Op_nat_min : BinOp (Order.min : nat -> _) := Op_minn.
 Add BinOp Op_nat_min.
 
-Instance Op_nat_min' : BinOp (Order.join : nat^d -> _) := Op_minn.
+Instance Op_nat_min' : BinOp ((Order.max : nat^d -> _) : nat -> nat -> nat) :=
+  { TBOp := Z.min; TBOpInj := ltac:(move=> ? ? /=; case: leP; lia) }.
 Add BinOp Op_nat_min'.
 
-Instance Op_nat_max : BinOp (Order.join : nat -> _) := Op_maxn.
+Instance Op_nat_max : BinOp (Order.max : nat -> _) := Op_maxn.
 Add BinOp Op_nat_max.
 
-Instance Op_nat_max' : BinOp (Order.meet : nat^d -> _) := Op_maxn.
+Instance Op_nat_max' : BinOp ((Order.min : nat^d -> _) : nat -> nat -> nat) :=
+  { TBOp := Z.max; TBOpInj := ltac:(move=> ? ? /=; case: leP; lia) }.
 Add BinOp Op_nat_max'.
+
+Instance Op_nat_meet : BinOp (Order.meet : nat -> _) := Op_minn.
+Add BinOp Op_nat_meet.
+
+Instance Op_nat_meet' : BinOp (Order.join : nat^d -> _) := Op_minn.
+Add BinOp Op_nat_meet'.
+
+Instance Op_nat_join : BinOp (Order.join : nat -> _) := Op_maxn.
+Add BinOp Op_nat_join.
+
+Instance Op_nat_join' : BinOp (Order.meet : nat^d -> _) := Op_maxn.
+Add BinOp Op_nat_join'.
 
 Instance Op_nat_bottom : CstOp (0%O : nat) := Op_O.
 Add CstOp Op_nat_bottom.
@@ -380,19 +412,35 @@ Add BinOp Op_int_gt.
 Instance Op_int_gt' : BinOp (<^d%O : rel int^d) := Op_int_gt.
 Add BinOp Op_int_gt'.
 
-Instance Op_int_min : BinOp (Order.meet : int -> int -> int) :=
+Instance Op_int_min : BinOp (Order.min : int -> int -> int) :=
   { TBOp := Z.min; TBOpInj := ltac:(move=> ? ? /=; case: leP; lia) }.
 Add BinOp Op_int_min.
 
-Instance Op_int_min' : BinOp (Order.join : int^d -> _) := Op_int_min.
+Instance Op_int_min' : BinOp ((Order.max : int^d -> _) : int -> int -> int) :=
+  { TBOp := Z.min; TBOpInj := ltac:(move=> ? ? /=; case: leP; lia) }.
 Add BinOp Op_int_min'.
 
-Instance Op_int_max : BinOp (Order.join : int -> int -> int) :=
+Instance Op_int_max : BinOp (Order.max : int -> int -> int) :=
   { TBOp := Z.max; TBOpInj := ltac:(move=> ? ? /=; case: leP; lia) }.
 Add BinOp Op_int_max.
 
-Instance Op_int_max' : BinOp (Order.meet : int^d -> _) := Op_int_max.
+Instance Op_int_max' : BinOp ((Order.min : int^d -> _) : int -> int -> int) :=
+  { TBOp := Z.max; TBOpInj := ltac:(move=> ? ? /=; case: leP; lia) }.
 Add BinOp Op_int_max'.
+
+Instance Op_int_meet : BinOp (Order.meet : int -> int -> int) :=
+  { TBOp := Z.min; TBOpInj := ltac:(move=> ? ? /=; case: leP; lia) }.
+Add BinOp Op_int_meet.
+
+Instance Op_int_meet' : BinOp (Order.join : int^d -> _) := Op_int_min.
+Add BinOp Op_int_meet'.
+
+Instance Op_int_join : BinOp (Order.join : int -> int -> int) :=
+  { TBOp := Z.max; TBOpInj := ltac:(move=> ? ? /=; case: leP; lia) }.
+Add BinOp Op_int_join.
+
+Instance Op_int_join' : BinOp (Order.meet : int^d -> _) := Op_int_max.
+Add BinOp Op_int_join'.
 
 (******************************************************************************)
 (* int <-> Z                                                                  *)
@@ -605,6 +653,10 @@ Add BinOp Op_bool_min.
 Add BinOp Op_bool_min'.
 Add BinOp Op_bool_max.
 Add BinOp Op_bool_max'.
+Add BinOp Op_bool_meet.
+Add BinOp Op_bool_meet'.
+Add BinOp Op_bool_join.
+Add BinOp Op_bool_join'.
 Add CstOp Op_bool_bottom.
 Add CstOp Op_bool_bottom'.
 Add CstOp Op_bool_top.
@@ -641,6 +693,10 @@ Add BinOp Op_nat_min.
 Add BinOp Op_nat_min'.
 Add BinOp Op_nat_max.
 Add BinOp Op_nat_max'.
+Add BinOp Op_nat_meet.
+Add BinOp Op_nat_meet'.
+Add BinOp Op_nat_join.
+Add BinOp Op_nat_join'.
 Add CstOp Op_nat_bottom.
 Add InjTyp Inj_int_Z.
 Add UnOp Op_Z_of_int.
@@ -680,6 +736,10 @@ Add BinOp Op_int_min.
 Add BinOp Op_int_min'.
 Add BinOp Op_int_max.
 Add BinOp Op_int_max'.
+Add BinOp Op_int_meet.
+Add BinOp Op_int_meet'.
+Add BinOp Op_int_join.
+Add BinOp Op_int_join'.
 Add UnOp Op_int_of_Z.
 Add BinOp Op_divZ.
 Add BinOp Op_modZ.
