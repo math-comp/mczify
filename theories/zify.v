@@ -442,57 +442,54 @@ Instance Op_dvdz : BinOp dvdz :=
   { TBOp := fun x y => isZero (modZ y x); TBOpInj := Op_dvdz_subproof }.
 Add BinOp Op_dvdz.
 
-Lemma divZ_spec_subproof n m :
-  (0 < m -> divZ n m * m <= n < (divZ n m + 1) * m)%Z /\
-  (m < 0 -> divZ n m * m <= n < (divZ n m - 1) * m)%Z /\
-  (m = 0 -> divZ n m = 0)%Z.
-Proof.
-suff: let n := int_of_Z n in
-      let m := int_of_Z m in
-      [/\ 0 < m -> divz n m * m <= n < (divz n m + 1) * m,
-          m < 0 -> divz n m * m <= n < (divz n m - 1) * m
-        & m = 0 -> divz n m = 0]%R
-  by case=> hpos hneg h0; split => [{hneg h0}|{hpos}]; lia.
-move: (int_of_Z n) (int_of_Z m) => {}n {}m /=; split => hm.
-- rewrite -[(_ * m)%R]addr0 mulrDl mul1r {2 3}(divz_eq n m).
-  rewrite ler_add2l ltr_add2l ltz_pmod // modz_ge0; lia.
-- rewrite -[(divz _ _ * _)%R]addr0 mulrDl mulN1r {2 3}(divz_eq n m).
-  rewrite ler_add2l ltr_add2l -modzN ltz_pmod ?modz_ge0; lia.
-- by rewrite hm divz0.
-Qed.
+(* Reimplementation of Z.div_mod_to_equations (PreOmega.v) for divZ and modZ: *)
 
-Instance divZ_spec : BinOpSpec divZ :=
-  { BPred := fun n m r => (0 < m -> r * m <= n < (r + 1) * m)%Z /\
-                          (m < 0 -> r * m <= n < (r - 1) * m)%Z /\
-                          (m = 0 -> r = 0)%Z;
-    BSpec := divZ_spec_subproof }.
-Add Spec divZ_spec.
+Lemma divZ_eq m d : m = (divZ m d * d + modZ m d)%Z.
+Proof. by move: (divz_eq (int_of_Z m) (int_of_Z d)); lia. Qed.
 
-Lemma modZ_spec_subproof n m :
-  (n = divZ n m * m + modZ n m /\
-   (0 < m -> 0 <= modZ n m < m) /\
-   (m < 0 -> 0 <= modZ n m < - m) /\
-   (m = 0 -> modZ n m = n))%Z.
-Proof.
-have: let n := int_of_Z n in
-      let m := int_of_Z m in
-      [/\ n = divz n m * m + modz n m,
-          0 < m -> 0 <= modz n m < m, m < 0 -> 0 <= modz n m < - m
-        & m = 0 -> modz n m = n]%R
-  by rewrite /= -divz_eq /modz; split; lia.
-case=> hn hpos hneg h0;
-  split => [{hpos hneg h0}|{hn}]; last split => [{hneg h0}|{hpos}]; lia.
-Qed.
+Lemma modZ_ge0 m d : d <> 0%Z -> (0 <= modZ m d)%Z.
+Proof. by move: (@modz_ge0 (int_of_Z m) (int_of_Z d)); lia. Qed.
 
-Instance modZ_spec : BinOpSpec modZ :=
-  { BPred := (fun n m r =>
-                n = divZ n m * m + r /\
-                (0 < m -> 0 <= r < m) /\
-                (m < 0 -> 0 <= r < - m) /\
-                (m = 0 -> r = n))%Z;
-    BSpec := modZ_spec_subproof }.
-Add Spec modZ_spec.
-Add Spec divZ_spec. (* workaround *)
+Lemma ltz_pmodZ m d : (0 < d)%Z -> (modZ m d < d)%Z.
+Proof. by move: (@ltz_mod (int_of_Z m) (int_of_Z d)); lia. Qed.
+
+Lemma ltz_nmodZ m d : (d < 0)%Z -> (modZ m d < - d)%Z.
+Proof. by move: (@ltz_mod (int_of_Z m) (int_of_Z d)); lia. Qed.
+
+Lemma divZ0 m d : d = 0%Z -> divZ m d = 0%Z.
+Proof. by move: (divz0 (int_of_Z m)) => ? ->; lia. Qed.
+
+Ltac divZ_modZ_to_equations :=
+  let divZ_modZ_to_equations' m d :=
+    pose proof (@divZ_eq m d);
+    pose proof (@modZ_ge0 m d);
+    pose proof (@ltz_pmodZ m d);
+    pose proof (@ltz_nmodZ m d);
+    pose proof (@divZ0 m d);
+    let q := fresh "q" in
+    let r := fresh "r" in
+    set (q := divZ m d) in *;
+    set (r := modZ m d) in *;
+    (* Find [divZ ?m' ?d'] and [modZ ?m' ?d'] that are convertible with       *)
+    (* [divZ m d] and [modZ m d] respectively.                                *)
+    repeat
+      match goal with
+        | |- context [divZ ?m' ?d'] => change (divZ m' d') with q
+        | |- context [modZ ?m' ?d'] => change (modZ m' d') with r
+        | H : context [divZ ?m' ?d'] |- _ => change (divZ m' d') with q in H
+        | H : context [modZ ?m' ?d'] |- _ => change (modZ m' d') with r in H
+      end;
+    clearbody q r
+  in
+  repeat
+    match goal with
+      | [ |- context [divZ ?m ?d] ] => divZ_modZ_to_equations' m d
+      | [ |- context [modZ ?m ?d] ] => divZ_modZ_to_equations' m d
+      | [ H : context [divZ ?m ?d] |- _] => divZ_modZ_to_equations' m d
+      | [ H : context [modZ ?m ?d] |- _] => divZ_modZ_to_equations' m d
+    end.
+
+Ltac Zify.zify_post_hook ::= divZ_modZ_to_equations.
 
 (******************************************************************************)
 (* natdiv                                                                     *)
@@ -689,8 +686,6 @@ Add BinOp Op_modZ.
 Add BinOp Op_divz.
 Add BinOp Op_modz.
 Add BinOp Op_dvdz.
-Add Spec modZ_spec.
-Add Spec divZ_spec.
 Add BinOp Op_divn.
 Add BinOp Op_modn.
 Add BinOp Op_dvdn.
