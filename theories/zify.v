@@ -671,6 +671,9 @@ Instance Op_natdvd_bottom : CstOp (0%O : natdvd) :=
   { TCst := 1%Z; TCstInj := erefl }.
 Add Zify CstOp Op_natdvd_bottom.
 
+Instance Op_natdvd_top : CstOp (1%O : natdvd) := Op_O.
+Add Zify CstOp Op_natdvd_top.
+
 (* missing: definitions in prime and binomial *)
 
 End MathcompZifyInstances.
@@ -811,4 +814,5 @@ Add Zify BinOp Op_natdvd_meet'.
 Add Zify BinOp Op_natdvd_join.
 Add Zify BinOp Op_natdvd_join'.
 Add Zify CstOp Op_natdvd_bottom.
+Add Zify CstOp Op_natdvd_top.
 End Exports.
