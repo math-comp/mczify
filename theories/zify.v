@@ -10,13 +10,7 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-Ltac zify ::=
-  intros;
-  unfold is_true in *; do ?rewrite -> unfold_in in *;
-  zify_elim_let;
-  zify_op;
-  zify_iter_specs;
-  zify_saturate; zify_post_hook.
+Ltac Zify.zify_pre_hook ::= unfold is_true in *; do ?rewrite -> unfold_in in *.
 
 Module MathcompZifyInstances.
 
