@@ -324,7 +324,7 @@ Add UnOp Op_int_sgr.
 
 Lemma Op_int_min_subproof n m :
   Z_of_int (Num.min n m) = Z.min (Z_of_int n) (Z_of_int m).
-Proof. case: minrP; lia. Qed.
+Proof. rewrite /Num.min; case: ifP; lia. Qed.
 
 Instance Op_int_min : BinOp Num.min :=
   {| TBOp := Z.min; TBOpInj := Op_int_min_subproof |}.
@@ -332,7 +332,7 @@ Add BinOp Op_int_min.
 
 Lemma Op_int_max_subproof n m :
   Z_of_int (Num.max n m) = Z.max (Z_of_int n) (Z_of_int m).
-Proof. case: maxrP; lia. Qed.
+Proof. rewrite /Num.max; case: ifP; lia. Qed.
 
 Instance Op_int_max : BinOp Num.max :=
   {| TBOp := Z.max; TBOpInj := Op_int_max_subproof |}.
