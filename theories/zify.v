@@ -332,9 +332,7 @@ Add BinOp Op_int_min.
 
 Lemma Op_int_max_subproof n m :
   Z_of_int (Num.max n m) = Z.max (Z_of_int n) (Z_of_int m).
-Proof.
-  unfold Num.max; destruct (n < m)%R eqn:HD; lia.
-Qed.
+Proof. rewrite /Num.max; case: ifP; lia. Qed.
 
 Instance Op_int_max : BinOp Num.max :=
   {| TBOp := Z.max; TBOpInj := Op_int_max_subproof |}.
