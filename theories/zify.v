@@ -324,9 +324,7 @@ Add UnOp Op_int_sgr.
 
 Lemma Op_int_min_subproof n m :
   Z_of_int (Num.min n m) = Z.min (Z_of_int n) (Z_of_int m).
-Proof.
-  unfold Num.min; destruct (n < m)%R eqn:HD; lia.
-Qed.
+Proof. rewrite /Num.min; case: ifP; lia. Qed.
 
 Instance Op_int_min : BinOp Num.min :=
   {| TBOp := Z.min; TBOpInj := Op_int_min_subproof |}.
