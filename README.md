@@ -3,4 +3,4 @@
 ## Requirements
 
 - Coq 8.13 or later, and
-- The master branch of Mathematical Components (after 1.11.0).
+- Mathematical Components 1.12.0 or later.
