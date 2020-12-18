@@ -3,8 +3,7 @@ From Coq Require Export Lia.
 
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq path.
 From mathcomp Require Import div choice fintype tuple finfun bigop finset prime.
-From mathcomp Require Import order binomial ssralg countalg ssrnum ssrint rat.
-From mathcomp Require Import intdiv.
+From mathcomp Require Import order binomial.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -12,11 +11,9 @@ Unset Printing Implicit Defensive.
 
 Ltac Zify.zify_pre_hook ::= unfold is_true in *; do ?rewrite -> unfold_in in *.
 
-Module MathcompZifyInstances.
+Module SsreflectZifyInstances.
 
-Import Order.Theory GRing.Theory Num.Theory.
-
-Local Delimit Scope Z_scope with Z.
+Import Order.Theory.
 
 Instance Op_bool_inj : UnOp (inj : bool -> bool) :=
   { TUOp := id; TUOpInj := fun => erefl }.
@@ -26,7 +23,7 @@ Instance Op_nat_inj : UnOp (inj : nat -> Z) := Op_Z_of_nat.
 Add Zify UnOp Op_nat_inj.
 
 (******************************************************************************)
-(* bool                                                                       *)
+(* ssrbool                                                                    *)
 (******************************************************************************)
 
 Instance Op_addb : BinOp addb :=
@@ -118,7 +115,7 @@ Instance Op_bool_compl : UnOp (Order.compl : bool -> bool) := Op_negb.
 Add Zify UnOp Op_bool_compl.
 
 (******************************************************************************)
-(* nat                                                                        *)
+(* ssrnat                                                                     *)
 (******************************************************************************)
 
 Instance Op_eqn : BinOp eqn := Op_nat_eqb.
@@ -145,11 +142,8 @@ Add Zify BinOp Op_muln_rec.
 Instance Op_muln : BinOp muln := Op_mul.
 Add Zify BinOp Op_muln.
 
-Lemma nat_lebE n m : (n <= m) = Nat.leb n m.
-Proof. by elim: n m => [|n ih []]. Qed.
-
 Instance Op_leq : BinOp leq :=
-  { TBOp := Z.leb; TBOpInj := ltac:(move=> ? ?; rewrite nat_lebE; lia) }.
+  { TBOp := Z.leb; TBOpInj := ltac:(rewrite /leq; lia) }.
 Add Zify BinOp Op_leq.
 
 Instance Op_geq : BinOp (geq : nat -> nat -> bool) :=
@@ -189,10 +183,6 @@ Add Zify BinOp Op_expn_rec.
 
 Instance Op_expn : BinOp expn := Op_expn_rec.
 Add Zify BinOp Op_expn.
-
-(* missing: *)
-(* Print fact_rec. *)
-(* Print factorial. *)
 
 Instance Op_nat_le : BinOp (<=%O : rel nat) := Op_leq.
 Add Zify BinOp Op_nat_le.
@@ -248,6 +238,312 @@ Instance Op_nat_bottom : CstOp (0%O : nat) := Op_O.
 Add Zify CstOp Op_nat_bottom.
 
 (******************************************************************************)
+(* division / modulo: Since `divz` and `modz` of MathComp (defined in         *)
+(* `intdiv.v`) are incompatible with the division and modulo functions for    *)
+(* `Z` in the Coq standard library, here we have to define ones for `Z` which *)
+(* behave the same as `divz` and `modz`.                                      *)
+(******************************************************************************)
+
+Definition divZ (m d : Z) : Z :=
+  Z.sgn d *
+  match m with
+  | Z0 => 0
+  | Z.pos p => Z.of_nat (Pos.to_nat p %/ Z.abs_nat d)%N
+  | Z.neg p => - Z.succ (Z.of_nat ((Pos.to_nat p).-1 %/ Z.abs_nat d)%N)
+  end%Z.
+
+Definition modZ (m d : Z) : Z := (m - divZ m d * d)%Z.
+
+Instance Op_divZ : BinOp divZ := { TBOp := divZ; TBOpInj := fun _ _ => erefl }.
+Add Zify BinOp Op_divZ.
+
+Instance Op_modZ : BinOp modZ := { TBOp := modZ; TBOpInj := fun _ _ => erefl }.
+Add Zify BinOp Op_modZ.
+
+(* Reimplementation of Z.div_mod_to_equations (PreOmega.v) for divZ and modZ: *)
+
+Lemma divZ_eq m d : m = (divZ m d * d + modZ m d)%Z.
+Proof. rewrite /modZ; lia. Qed.
+
+Lemma modZ_ge0 m d : d <> 0%Z -> (0 <= modZ m d)%Z.
+Proof.
+by move: d m => [] // d [] // m _; rewrite /modZ /divZ [Z.abs_nat _]/=;
+  move: (leq_trunc_div (Pos.to_nat m) (Pos.to_nat d));
+  move: (@ltn_ceil (Pos.to_nat m).-1 (Pos.to_nat d)); lia.
+Qed.
+
+Lemma ltz_pmodZ m d : (0 < d)%Z -> (modZ m d < d)%Z.
+Proof.
+by move: d m => [] // d [] // m _; rewrite /modZ /divZ [Z.abs_nat _]/=;
+  move: (leq_trunc_div (Pos.to_nat m).-1 (Pos.to_nat d));
+  move: (@ltn_ceil (Pos.to_nat m) (Pos.to_nat d)); lia.
+Qed.
+
+Lemma ltz_nmodZ m d : (d < 0)%Z -> (modZ m d < - d)%Z.
+Proof.
+move: d m => [] // d [] // m _; rewrite /modZ /divZ [Z.abs_nat _]/=;
+  move: (leq_trunc_div (Pos.to_nat m).-1 (Pos.to_nat d));
+  move: (@ltn_ceil (Pos.to_nat m) (Pos.to_nat d)); lia.
+Qed.
+
+Lemma divZ0 m d : d = 0%Z -> divZ m d = 0%Z.
+Proof. by move=> ->. Qed.
+
+Ltac divZ_modZ_to_equations :=
+  let divZ_modZ_to_equations' m d :=
+    pose proof (@divZ_eq m d);
+    pose proof (@modZ_ge0 m d);
+    pose proof (@ltz_pmodZ m d);
+    pose proof (@ltz_nmodZ m d);
+    pose proof (@divZ0 m d);
+    let q := fresh "q" in
+    let r := fresh "r" in
+    set (q := divZ m d) in *;
+    set (r := modZ m d) in *;
+    (* Find [divZ ?m' ?d'] and [modZ ?m' ?d'] that are convertible with       *)
+    (* [divZ m d] and [modZ m d] respectively.                                *)
+    repeat
+      match goal with
+        | |- context [divZ ?m' ?d'] => change (divZ m' d') with q
+        | |- context [modZ ?m' ?d'] => change (modZ m' d') with r
+        | H : context [divZ ?m' ?d'] |- _ => change (divZ m' d') with q in H
+        | H : context [modZ ?m' ?d'] |- _ => change (modZ m' d') with r in H
+      end;
+    clearbody q r
+  in
+  repeat
+    match goal with
+      | [ |- context [divZ ?m ?d] ] => divZ_modZ_to_equations' m d
+      | [ |- context [modZ ?m ?d] ] => divZ_modZ_to_equations' m d
+      | [ H : context [divZ ?m ?d] |- _] => divZ_modZ_to_equations' m d
+      | [ H : context [modZ ?m ?d] |- _] => divZ_modZ_to_equations' m d
+    end.
+
+Ltac Zify.zify_post_hook ::= elim_bool_cstr; divZ_modZ_to_equations.
+
+(******************************************************************************)
+(* div (divn, modn, dvdn, gcdn, lcmn, and coprime)                            *)
+(******************************************************************************)
+
+Lemma Op_divn_subproof n m : Z.of_nat (n %/ m) = divZ (Z.of_nat n) (Z.of_nat m).
+Proof.
+by case: n m => [|n] [|m]; rewrite /divZ //= ?SuccNat2Pos.id_succ; case: divn.
+Qed.
+
+Instance Op_divn : BinOp divn := { TBOp := divZ; TBOpInj := Op_divn_subproof }.
+Add Zify BinOp Op_divn.
+
+Instance Op_modn : BinOp modn :=
+  { TBOp := modZ; TBOpInj := ltac:(move=> n m; move: (divn_eq n m); lia) }.
+Add Zify BinOp Op_modn.
+
+Instance Op_dvdn : BinOp dvdn :=
+  { TBOp := fun x y => Z.eqb (modZ y x) 0%Z;
+    TBOpInj := ltac:(rewrite /dvdn; lia) }.
+Add Zify BinOp Op_dvdn.
+
+Instance Op_odd : UnOp odd :=
+  { TUOp := fun x => Z.eqb (modZ x 2) 1%Z;
+    TUOpInj := ltac:(move=> n; case: odd (modn2 n); lia) }.
+Add Zify UnOp Op_odd.
+
+Instance Op_half : UnOp half :=
+  { TUOp := fun x => divZ x 2;
+    TUOpInj := ltac:(move=> ?; rewrite -divn2; lia) }.
+Add Zify UnOp Op_half.
+
+Instance Op_uphalf : UnOp uphalf :=
+  { TUOp := fun x => divZ (x + 1)%Z 2;
+    TUOpInj := ltac:(move=> ?; rewrite uphalf_half; lia) }.
+Add Zify UnOp Op_uphalf.
+
+Lemma Op_gcdn_subproof n m :
+  Z.of_nat (gcdn n m) = Z.gcd (Z.of_nat n) (Z.of_nat m).
+Proof.
+apply/esym/Z.gcd_unique; first by case: gcdn.
+- case/dvdnP: (dvdn_gcdl n m) => k {2}->; exists (Z.of_nat k); lia.
+- case/dvdnP: (dvdn_gcdr n m) => k {2}->; exists (Z.of_nat k); lia.
+- move=> k [n' Hkn] [m' Hkm].
+  suff/dvdnP [k' ->]: Z.abs_nat k %| gcdn n m.
+    by apply/Znumtheory.Zdivide_Zabs_l; exists (Z.of_nat k'); lia.
+  rewrite dvdn_gcd; apply/andP; split; apply/dvdnP;
+    [exists (Z.abs_nat n') | exists (Z.abs_nat m')]; nia.
+Qed.
+
+Instance Op_gcdn : BinOp gcdn := { TBOp := Z.gcd; TBOpInj := Op_gcdn_subproof }.
+Add Zify BinOp Op_gcdn.
+
+Lemma Op_lcmn_subproof n m :
+  Z.of_nat (lcmn n m) = Z.lcm (Z.of_nat n) (Z.of_nat m).
+Proof.
+case: n m => [|n][|m]; rewrite ?lcmn0 // /lcmn /Z.lcm -Op_gcdn_subproof.
+case/dvdnP: (dvdn_gcdr n.+1 m.+1) => k {1 3}->.
+rewrite mulnA mulnK ?gcdn_gt0 // !Nat2Z.inj_mul Z_div_mult_full //; first nia.
+by case: (gcdn _ _) (gcdn_gt0 n.+1 m.+1).
+Qed.
+
+Instance Op_lcmn : BinOp lcmn := { TBOp := Z.lcm; TBOpInj := Op_lcmn_subproof }.
+Add Zify BinOp Op_lcmn.
+
+Instance Op_coprime : BinOp coprime :=
+  { TBOp := fun x y => Z.eqb (Z.gcd x y) 1%Z;
+    TBOpInj := ltac:(rewrite /= /coprime; lia) }.
+Add Zify BinOp Op_coprime.
+
+(******************************************************************************)
+(* natdvd in order.v                                                          *)
+(******************************************************************************)
+
+Instance Op_natdvd_le : BinOp (<=%O : rel natdvd) := Op_dvdn.
+Add Zify BinOp Op_natdvd_le.
+
+Instance Op_natdvd_le' : BinOp (>=^d%O : rel natdvd^d) := Op_dvdn.
+Add Zify BinOp Op_natdvd_le'.
+
+Instance Op_natdvd_ge : BinOp ((>=%O : rel natdvd) : nat -> nat -> bool) :=
+  { TBOp := fun x y => Z.eqb (modZ x y) 0%Z; TBOpInj := ltac:(simpl; lia) }.
+Add Zify BinOp Op_natdvd_ge.
+
+Instance Op_natdvd_ge' : BinOp (<=^d%O : rel natdvd^d) := Op_natdvd_ge.
+Add Zify BinOp Op_natdvd_ge'.
+
+Instance Op_natdvd_lt : BinOp ((<%O : rel natdvd) : nat -> nat -> bool) :=
+  { TBOp := fun x y => negb (Z.eqb y x) && Z.eqb (modZ y x) 0%Z;
+    TBOpInj := ltac:(move=> ? ? /=; rewrite sdvdEnat; lia) }.
+Add Zify BinOp Op_natdvd_lt.
+
+Instance Op_natdvd_lt' : BinOp (>^d%O : rel natdvd^d) := Op_natdvd_lt.
+Add Zify BinOp Op_natdvd_lt'.
+
+Instance Op_natdvd_gt : BinOp ((>%O : rel natdvd) : nat -> nat -> bool) :=
+  { TBOp := fun x y => negb (Z.eqb x y) && Z.eqb (modZ x y) 0%Z;
+    TBOpInj := ltac:(move=> ? ? /=; rewrite sdvdEnat; lia) }.
+Add Zify BinOp Op_natdvd_gt.
+
+Instance Op_natdvd_gt' : BinOp (<^d%O : rel natdvd^d) := Op_natdvd_gt.
+Add Zify BinOp Op_natdvd_gt'.
+
+Instance Op_natdvd_meet : BinOp (Order.meet : natdvd -> _) := Op_gcdn.
+Add Zify BinOp Op_natdvd_meet.
+
+Instance Op_natdvd_meet' : BinOp (Order.join : natdvd^d -> _) := Op_gcdn.
+Add Zify BinOp Op_natdvd_meet'.
+
+Instance Op_natdvd_join : BinOp (Order.join : natdvd -> _) := Op_lcmn.
+Add Zify BinOp Op_natdvd_join.
+
+Instance Op_natdvd_join' : BinOp (Order.meet : natdvd^d -> _) := Op_lcmn.
+Add Zify BinOp Op_natdvd_join'.
+
+Instance Op_natdvd_bottom : CstOp (0%O : natdvd) :=
+  { TCst := 1%Z; TCstInj := erefl }.
+Add Zify CstOp Op_natdvd_bottom.
+
+Instance Op_natdvd_top : CstOp (1%O : natdvd) := Op_O.
+Add Zify CstOp Op_natdvd_top.
+
+Module Exports.
+(* Add Zify UnOp Op_bool_inj. *)
+(* Add Zify UnOp Op_nat_inj. *)
+Add Zify BinOp Op_addb.
+Add Zify BinOp Op_eqb.
+Add Zify BinOp Op_eq_op_bool.
+Add Zify BinOp Op_bool_le.
+Add Zify BinOp Op_bool_le'.
+Add Zify BinOp Op_bool_ge.
+Add Zify BinOp Op_bool_ge'.
+Add Zify BinOp Op_bool_lt.
+Add Zify BinOp Op_bool_lt'.
+Add Zify BinOp Op_bool_gt.
+Add Zify BinOp Op_bool_gt'.
+Add Zify BinOp Op_bool_min.
+Add Zify BinOp Op_bool_min'.
+Add Zify BinOp Op_bool_max.
+Add Zify BinOp Op_bool_max'.
+Add Zify BinOp Op_bool_meet.
+Add Zify BinOp Op_bool_meet'.
+Add Zify BinOp Op_bool_join.
+Add Zify BinOp Op_bool_join'.
+Add Zify CstOp Op_bool_bottom.
+Add Zify CstOp Op_bool_bottom'.
+Add Zify CstOp Op_bool_top.
+Add Zify CstOp Op_bool_top'.
+Add Zify BinOp Op_bool_sub.
+Add Zify UnOp Op_bool_compl.
+Add Zify BinOp Op_eqn.
+Add Zify BinOp Op_eq_op_nat.
+Add Zify BinOp Op_addn_rec.
+Add Zify BinOp Op_addn.
+Add Zify BinOp Op_subn_rec.
+Add Zify BinOp Op_subn.
+Add Zify BinOp Op_muln_rec.
+Add Zify BinOp Op_muln.
+Add Zify BinOp Op_leq.
+Add Zify BinOp Op_geq.
+Add Zify BinOp Op_ltn.
+Add Zify BinOp Op_gtn.
+Add Zify BinOp Op_minn.
+Add Zify BinOp Op_maxn.
+Add Zify UnOp Op_nat_of_bool.
+Add Zify UnOp Op_double.
+Add Zify BinOp Op_expn_rec.
+Add Zify BinOp Op_expn.
+Add Zify BinOp Op_nat_le.
+Add Zify BinOp Op_nat_le'.
+Add Zify BinOp Op_nat_ge.
+Add Zify BinOp Op_nat_ge'.
+Add Zify BinOp Op_nat_lt.
+Add Zify BinOp Op_nat_lt'.
+Add Zify BinOp Op_nat_gt.
+Add Zify BinOp Op_nat_gt'.
+Add Zify BinOp Op_nat_min.
+Add Zify BinOp Op_nat_min'.
+Add Zify BinOp Op_nat_max.
+Add Zify BinOp Op_nat_max'.
+Add Zify BinOp Op_nat_meet.
+Add Zify BinOp Op_nat_meet'.
+Add Zify BinOp Op_nat_join.
+Add Zify BinOp Op_nat_join'.
+Add Zify CstOp Op_nat_bottom.
+Add Zify BinOp Op_divZ.
+Add Zify BinOp Op_modZ.
+Add Zify BinOp Op_divn.
+Add Zify BinOp Op_modn.
+Add Zify BinOp Op_dvdn.
+Add Zify UnOp Op_odd.
+Add Zify UnOp Op_half.
+Add Zify UnOp Op_uphalf.
+Add Zify BinOp Op_gcdn.
+Add Zify BinOp Op_lcmn.
+Add Zify BinOp Op_coprime.
+Add Zify BinOp Op_natdvd_le.
+Add Zify BinOp Op_natdvd_le'.
+Add Zify BinOp Op_natdvd_ge.
+Add Zify BinOp Op_natdvd_ge'.
+Add Zify BinOp Op_natdvd_lt.
+Add Zify BinOp Op_natdvd_lt'.
+Add Zify BinOp Op_natdvd_gt.
+Add Zify BinOp Op_natdvd_gt'.
+Add Zify BinOp Op_natdvd_meet.
+Add Zify BinOp Op_natdvd_meet'.
+Add Zify BinOp Op_natdvd_join.
+Add Zify BinOp Op_natdvd_join'.
+Add Zify CstOp Op_natdvd_bottom.
+Add Zify CstOp Op_natdvd_top.
+End Exports.
+
+End SsreflectZifyInstances.
+Export SsreflectZifyInstances.Exports.
+
+From mathcomp Require Import ssralg countalg ssrnum ssrint rat intdiv.
+
+Module AlgebraZifyInstances.
+
+Local Delimit Scope Z_scope with Z.
+
+Import Order.Theory GRing.Theory Num.Theory SsreflectZifyInstances.
+
+(******************************************************************************)
 (* ssrint                                                                     *)
 (******************************************************************************)
 
@@ -278,12 +574,9 @@ Instance Op_int_eq : BinRel (@eq int) :=
   { TR := @eq Z; TRInj := Op_int_eq_subproof }.
 Add Zify BinRel Op_int_eq.
 
-Lemma Op_int_eq_op_subproof (n m : int) :
-  (n == m) = Z.eqb (Z_of_int n) (Z_of_int m).
-Proof. case: n m => ? [] ?; do 2 rewrite /eq_op /=; lia. Qed.
-
 Instance Op_int_eq_op : BinOp (@eq_op int_eqType : int -> int -> bool) :=
-  { TBOp := Z.eqb; TBOpInj := Op_int_eq_op_subproof }.
+  { TBOp := Z.eqb;
+    TBOpInj := ltac:(move=> [] ? [] ?; do 2 rewrite /eq_op /=; lia) }.
 Add Zify BinOp Op_int_eq_op.
 
 Instance Op_int_0 : CstOp (0%R : int) := { TCst := 0%Z; TCstInj := erefl }.
@@ -357,14 +650,8 @@ Instance Op_ltz : BinOp intOrdered.ltz :=
   { TBOp := Z.ltb; TBOpInj := ltac:(case=> ? [] ? /=; lia) }.
 Add Zify BinOp Op_ltz.
 
-(* missing: *)
-(* Print Num.Def.lerif. *)
-
-Lemma Op_int_sgr_subproof n : Z_of_int (Num.sg n) = Z.sgn (Z_of_int n).
-Proof. by case: n => [[]|n] //=; rewrite addn1. Qed.
-
 Instance Op_int_sgr : UnOp (Num.sg : int -> int) :=
-  { TUOp := Z.sgn; TUOpInj := Op_int_sgr_subproof }.
+  { TUOp := Z.sgn; TUOpInj := ltac:(case=> [[]|] //=; lia) }.
 Add Zify UnOp Op_int_sgr.
 
 Instance Op_int_sgz : UnOp (@sgz _) := Op_int_sgr.
@@ -427,183 +714,29 @@ Instance Op_int_join' : BinOp (Order.meet : int^d -> _) := Op_int_max.
 Add Zify BinOp Op_int_join'.
 
 (******************************************************************************)
-(* int <-> Z                                                                  *)
-(******************************************************************************)
-
-Definition int_of_Z (n : Z) :=
-  match n with
-  | Z0 => Posz 0
-  | Zpos p => Posz (Pos.to_nat p)
-  | Zneg p => Negz (Pos.to_nat p).-1
-  end.
-
-Lemma int_of_ZK : cancel int_of_Z Z_of_int. Proof. case=> //= p; lia. Qed.
-
-Instance Op_int_of_Z : UnOp int_of_Z :=
-  { TUOp := id : Z -> Z; TUOpInj := int_of_ZK }.
-Add Zify UnOp Op_int_of_Z.
-
-Lemma Z_of_intK : cancel Z_of_int int_of_Z. Proof. move=> ?; lia. Qed.
-
-(******************************************************************************)
 (* intdiv                                                                     *)
 (******************************************************************************)
 
-Definition divZ (n m : Z) : Z := Z_of_int (divz (int_of_Z n) (int_of_Z m)).
-Definition modZ (n m : Z) : Z := Z_of_int (modz (int_of_Z n) (int_of_Z m)).
-
-Instance Op_divZ : BinOp divZ := { TBOp := divZ; TBOpInj := fun _ _ => erefl }.
-Add Zify BinOp Op_divZ.
-
-Instance Op_modZ : BinOp modZ := { TBOp := modZ; TBOpInj := fun _ _ => erefl }.
-Add Zify BinOp Op_modZ.
+Lemma Op_divz_subproof n m :
+  Z_of_int (divz n m) = divZ (Z_of_int n) (Z_of_int m).
+Proof. case: n => [[|n]|n]; rewrite /divz /divZ /= ?addn1 /=; nia. Qed.
 
 Instance Op_divz : BinOp (divz : int -> int -> int) :=
-  { TBOp := divZ; TBOpInj := ltac:(by move=> ? ?; rewrite /divZ !Z_of_intK) }.
+  { TBOp := divZ; TBOpInj := Op_divz_subproof }.
 Add Zify BinOp Op_divz.
 
 Instance Op_modz : BinOp modz :=
-  { TBOp := modZ; TBOpInj := ltac:(by move=> ? ?; rewrite /modZ !Z_of_intK) }.
+  { TBOp := modZ; TBOpInj := ltac:(rewrite /= /modz; lia) }.
 Add Zify BinOp Op_modz.
 
-Lemma Op_dvdz_subproof (n m : int) :
-  dvdz n m = Z.eqb (modZ (Z_of_int m) (Z_of_int n)) 0%Z.
-Proof. apply/dvdz_mod0P/idP; lia. Qed.
-
 Instance Op_dvdz : BinOp dvdz :=
-  { TBOp := fun n m => Z.eqb (modZ m n) 0%Z; TBOpInj := Op_dvdz_subproof }.
+  { TBOp := fun n m => Z.eqb (modZ m n) 0%Z;
+    TBOpInj := ltac:(move=> ? ? /=; apply/dvdz_mod0P/idP; lia) }.
 Add Zify BinOp Op_dvdz.
-
-(* Reimplementation of Z.div_mod_to_equations (PreOmega.v) for divZ and modZ: *)
-
-Lemma divZ_eq m d : m = (divZ m d * d + modZ m d)%Z.
-Proof. by move: (divz_eq (int_of_Z m) (int_of_Z d)); lia. Qed.
-
-Lemma modZ_ge0 m d : d <> 0%Z -> (0 <= modZ m d)%Z.
-Proof. by move: (@modz_ge0 (int_of_Z m) (int_of_Z d)); lia. Qed.
-
-Lemma ltz_pmodZ m d : (0 < d)%Z -> (modZ m d < d)%Z.
-Proof. by move: (@ltz_mod (int_of_Z m) (int_of_Z d)); lia. Qed.
-
-Lemma ltz_nmodZ m d : (d < 0)%Z -> (modZ m d < - d)%Z.
-Proof. by move: (@ltz_mod (int_of_Z m) (int_of_Z d)); lia. Qed.
-
-Lemma divZ0 m d : d = 0%Z -> divZ m d = 0%Z.
-Proof. by move: (divz0 (int_of_Z m)) => ? ->; lia. Qed.
-
-Ltac divZ_modZ_to_equations :=
-  let divZ_modZ_to_equations' m d :=
-    pose proof (@divZ_eq m d);
-    pose proof (@modZ_ge0 m d);
-    pose proof (@ltz_pmodZ m d);
-    pose proof (@ltz_nmodZ m d);
-    pose proof (@divZ0 m d);
-    let q := fresh "q" in
-    let r := fresh "r" in
-    set (q := divZ m d) in *;
-    set (r := modZ m d) in *;
-    (* Find [divZ ?m' ?d'] and [modZ ?m' ?d'] that are convertible with       *)
-    (* [divZ m d] and [modZ m d] respectively.                                *)
-    repeat
-      match goal with
-        | |- context [divZ ?m' ?d'] => change (divZ m' d') with q
-        | |- context [modZ ?m' ?d'] => change (modZ m' d') with r
-        | H : context [divZ ?m' ?d'] |- _ => change (divZ m' d') with q in H
-        | H : context [modZ ?m' ?d'] |- _ => change (modZ m' d') with r in H
-      end;
-    clearbody q r
-  in
-  repeat
-    match goal with
-      | [ |- context [divZ ?m ?d] ] => divZ_modZ_to_equations' m d
-      | [ |- context [modZ ?m ?d] ] => divZ_modZ_to_equations' m d
-      | [ H : context [divZ ?m ?d] |- _] => divZ_modZ_to_equations' m d
-      | [ H : context [modZ ?m ?d] |- _] => divZ_modZ_to_equations' m d
-    end.
-
-Ltac Zify.zify_post_hook ::= elim_bool_cstr; divZ_modZ_to_equations.
-
-(******************************************************************************)
-(* natdiv                                                                     *)
-(******************************************************************************)
-
-Lemma Op_divn_subproof n m : Z.of_nat (n %/ m) = divZ (Z.of_nat n) (Z.of_nat m).
-Proof.
-by rewrite /divZ !(Z_of_intK (Posz _)) /divz; case: m => //= m; rewrite mul1n.
-Qed.
-
-Instance Op_divn : BinOp divn := { TBOp := divZ; TBOpInj := Op_divn_subproof }.
-Add Zify BinOp Op_divn.
-
-Lemma Op_modn_subproof n m : Z.of_nat (n %% m) = modZ (Z_of_int n) (Z_of_int m).
-Proof. by rewrite /modZ !Z_of_intK modz_nat. Qed.
-
-Instance Op_modn : BinOp modn := { TBOp := modZ; TBOpInj := Op_modn_subproof }.
-Add Zify BinOp Op_modn.
-
-Instance Op_dvdn : BinOp dvdn :=
-  { TBOp := fun x y => Z.eqb (modZ y x) 0%Z;
-    TBOpInj := ltac:(rewrite /dvdn; lia) }.
-Add Zify BinOp Op_dvdn.
-
-Instance Op_odd : UnOp odd :=
-  { TUOp := fun x => Z.eqb (modZ x 2) 1%Z;
-    TUOpInj := ltac:(move=> n; case: odd (modn2 n); lia) }.
-Add Zify UnOp Op_odd.
-
-Instance Op_half : UnOp half :=
-  { TUOp := fun x => divZ x 2;
-    TUOpInj := ltac:(move=> ?; rewrite -divn2; lia) }.
-Add Zify UnOp Op_half.
-
-Instance Op_uphalf : UnOp uphalf :=
-  { TUOp := fun x => divZ (x + 1)%Z 2;
-    TUOpInj := ltac:(move=> ?; rewrite uphalf_half; lia) }.
-Add Zify UnOp Op_uphalf.
-
-(******************************************************************************)
-(* gcd, lcm, and coprime                                                      *)
-(******************************************************************************)
-
-Lemma Op_gcdn_subproof n m :
-  Z.of_nat (gcdn n m) = Z.gcd (Z.of_nat n) (Z.of_nat m).
-Proof.
-apply/esym/Z.gcd_unique; first by case: gcdn.
-- case/dvdnP: (dvdn_gcdl n m) => k {2}->; exists (Z.of_nat k); lia.
-- case/dvdnP: (dvdn_gcdr n m) => k {2}->; exists (Z.of_nat k); lia.
-- move=> k [n' Hkn] [m' Hkm].
-  suff/dvdnP [k' ->]: Z.abs_nat k %| gcdn n m
-    by apply/Znumtheory.Zdivide_Zabs_l; exists (Z.of_nat k'); lia.
-  rewrite dvdn_gcd; apply/andP; split; apply/dvdnP;
-    [exists (Z.abs_nat n') | exists (Z.abs_nat m')]; nia.
-Qed.
-
-Instance Op_gcdn : BinOp gcdn := { TBOp := Z.gcd; TBOpInj := Op_gcdn_subproof }.
-Add Zify BinOp Op_gcdn.
-
-Lemma Op_lcmn_subproof n m :
-  Z.of_nat (lcmn n m) = Z.lcm (Z.of_nat n) (Z.of_nat m).
-Proof.
-case: n m => [|n][|m]; rewrite ?lcmn0 // /lcmn /Z.lcm -Op_gcdn_subproof.
-case/dvdnP: (dvdn_gcdr n.+1 m.+1) => k {1 3}->.
-rewrite mulnA mulnK ?gcdn_gt0 // !Nat2Z.inj_mul Z_div_mult_full //; first nia.
-by case: (gcdn _ _) (gcdn_gt0 n.+1 m.+1).
-Qed.
-
-Instance Op_lcmn : BinOp lcmn := { TBOp := Z.lcm; TBOpInj := Op_lcmn_subproof }.
-Add Zify BinOp Op_lcmn.
-
-Instance Op_coprime : BinOp coprime :=
-  { TBOp := fun x y => Z.eqb (Z.gcd x y) 1%Z;
-    TBOpInj := ltac:(rewrite /= /coprime; lia) }.
-Add Zify BinOp Op_coprime.
 
 Lemma Op_gcdz_subproof n m :
   Z_of_int (gcdz n m) = Z.gcd (Z_of_int n) (Z_of_int m).
-Proof.
-by rewrite /gcdz /= Op_gcdn_subproof; case: n m => n[]m;
-  rewrite ![absz _]/= -?(addn1 n) -?(addn1 m) /= ?Z.gcd_opp_l ?Z.gcd_opp_r.
-Qed.
+Proof. rewrite /gcdz -Z.gcd_abs_l -Z.gcd_abs_r; lia. Qed.
 
 Instance Op_gcdz : BinOp gcdz := { TBOp := Z.gcd; TBOpInj := Op_gcdz_subproof }.
 Add Zify BinOp Op_gcdz.
@@ -613,129 +746,7 @@ Instance Op_coprimez : BinOp coprimez :=
     TBOpInj := ltac:(rewrite /= /coprimez; lia) }.
 Add Zify BinOp Op_coprimez.
 
-(******************************************************************************)
-(* natdvd                                                                     *)
-(******************************************************************************)
-
-Instance Op_natdvd_le : BinOp (<=%O : rel natdvd) := Op_dvdn.
-Add Zify BinOp Op_natdvd_le.
-
-Instance Op_natdvd_le' : BinOp (>=^d%O : rel natdvd^d) := Op_dvdn.
-Add Zify BinOp Op_natdvd_le'.
-
-Instance Op_natdvd_ge : BinOp ((>=%O : rel natdvd) : nat -> nat -> bool) :=
-  { TBOp := fun x y => Z.eqb (modZ x y) 0%Z;
-    TBOpInj := ltac:(simpl; lia) }.
-Add Zify BinOp Op_natdvd_ge.
-
-Instance Op_natdvd_ge' : BinOp (<=^d%O : rel natdvd^d) := Op_natdvd_ge.
-Add Zify BinOp Op_natdvd_ge'.
-
-Instance Op_natdvd_lt : BinOp ((<%O : rel natdvd) : nat -> nat -> bool) :=
-  { TBOp := fun x y => negb (Z.eqb y x) && Z.eqb (modZ y x) 0%Z;
-    TBOpInj := ltac:(move=> ? ? /=; rewrite sdvdEnat; lia) }.
-Add Zify BinOp Op_natdvd_lt.
-
-Instance Op_natdvd_lt' : BinOp (>^d%O : rel natdvd^d) := Op_natdvd_lt.
-Add Zify BinOp Op_natdvd_lt'.
-
-Instance Op_natdvd_gt : BinOp ((>%O : rel natdvd) : nat -> nat -> bool) :=
-  { TBOp := fun x y => negb (Z.eqb x y) && Z.eqb (modZ x y) 0%Z;
-    TBOpInj := ltac:(move=> ? ? /=; rewrite sdvdEnat; lia) }.
-Add Zify BinOp Op_natdvd_gt.
-
-Instance Op_natdvd_gt' : BinOp (<^d%O : rel natdvd^d) := Op_natdvd_gt.
-Add Zify BinOp Op_natdvd_gt'.
-
-(* missing: min and max for natdvd *)
-
-Instance Op_natdvd_meet : BinOp (Order.meet : natdvd -> _) := Op_gcdn.
-Add Zify BinOp Op_natdvd_meet.
-
-Instance Op_natdvd_meet' : BinOp (Order.join : natdvd^d -> _) := Op_gcdn.
-Add Zify BinOp Op_natdvd_meet'.
-
-Instance Op_natdvd_join : BinOp (Order.join : natdvd -> _) := Op_lcmn.
-Add Zify BinOp Op_natdvd_join.
-
-Instance Op_natdvd_join' : BinOp (Order.meet : natdvd^d -> _) := Op_lcmn.
-Add Zify BinOp Op_natdvd_join'.
-
-Instance Op_natdvd_bottom : CstOp (0%O : natdvd) :=
-  { TCst := 1%Z; TCstInj := erefl }.
-Add Zify CstOp Op_natdvd_bottom.
-
-Instance Op_natdvd_top : CstOp (1%O : natdvd) := Op_O.
-Add Zify CstOp Op_natdvd_top.
-
-(* missing: definitions in prime and binomial *)
-
-End MathcompZifyInstances.
-
-Module Export Exports.
-Import MathcompZifyInstances.
-(* Add Zify UnOp Op_bool_inj. *)
-(* Add Zify UnOp Op_nat_inj. *)
-Add Zify BinOp Op_addb.
-Add Zify BinOp Op_eqb.
-Add Zify BinOp Op_eq_op_bool.
-Add Zify BinOp Op_bool_le.
-Add Zify BinOp Op_bool_le'.
-Add Zify BinOp Op_bool_ge.
-Add Zify BinOp Op_bool_ge'.
-Add Zify BinOp Op_bool_lt.
-Add Zify BinOp Op_bool_lt'.
-Add Zify BinOp Op_bool_gt.
-Add Zify BinOp Op_bool_gt'.
-Add Zify BinOp Op_bool_min.
-Add Zify BinOp Op_bool_min'.
-Add Zify BinOp Op_bool_max.
-Add Zify BinOp Op_bool_max'.
-Add Zify BinOp Op_bool_meet.
-Add Zify BinOp Op_bool_meet'.
-Add Zify BinOp Op_bool_join.
-Add Zify BinOp Op_bool_join'.
-Add Zify CstOp Op_bool_bottom.
-Add Zify CstOp Op_bool_bottom'.
-Add Zify CstOp Op_bool_top.
-Add Zify CstOp Op_bool_top'.
-Add Zify BinOp Op_bool_sub.
-Add Zify UnOp Op_bool_compl.
-Add Zify BinOp Op_eqn.
-Add Zify BinOp Op_eq_op_nat.
-Add Zify BinOp Op_addn_rec.
-Add Zify BinOp Op_addn.
-Add Zify BinOp Op_subn_rec.
-Add Zify BinOp Op_subn.
-Add Zify BinOp Op_muln_rec.
-Add Zify BinOp Op_muln.
-Add Zify BinOp Op_leq.
-Add Zify BinOp Op_geq.
-Add Zify BinOp Op_ltn.
-Add Zify BinOp Op_gtn.
-Add Zify BinOp Op_minn.
-Add Zify BinOp Op_maxn.
-Add Zify UnOp Op_nat_of_bool.
-Add Zify UnOp Op_double.
-Add Zify BinOp Op_expn_rec.
-Add Zify BinOp Op_expn.
-Add Zify BinOp Op_nat_le.
-Add Zify BinOp Op_nat_le'.
-Add Zify BinOp Op_nat_ge.
-Add Zify BinOp Op_nat_ge'.
-Add Zify BinOp Op_nat_lt.
-Add Zify BinOp Op_nat_lt'.
-Add Zify BinOp Op_nat_gt.
-Add Zify BinOp Op_nat_gt'.
-Add Zify BinOp Op_nat_min.
-Add Zify BinOp Op_nat_min'.
-Add Zify BinOp Op_nat_max.
-Add Zify BinOp Op_nat_max'.
-Add Zify BinOp Op_nat_meet.
-Add Zify BinOp Op_nat_meet'.
-Add Zify BinOp Op_nat_join.
-Add Zify BinOp Op_nat_join'.
-Add Zify CstOp Op_nat_bottom.
+Module Exports.
 Add Zify InjTyp Inj_int_Z.
 Add Zify UnOp Op_Z_of_int.
 Add Zify UnOp Op_Posz.
@@ -778,35 +789,12 @@ Add Zify BinOp Op_int_meet.
 Add Zify BinOp Op_int_meet'.
 Add Zify BinOp Op_int_join.
 Add Zify BinOp Op_int_join'.
-Add Zify UnOp Op_int_of_Z.
-Add Zify BinOp Op_divZ.
-Add Zify BinOp Op_modZ.
 Add Zify BinOp Op_divz.
 Add Zify BinOp Op_modz.
 Add Zify BinOp Op_dvdz.
-Add Zify BinOp Op_divn.
-Add Zify BinOp Op_modn.
-Add Zify BinOp Op_dvdn.
-Add Zify UnOp Op_odd.
-Add Zify UnOp Op_half.
-Add Zify UnOp Op_uphalf.
-Add Zify BinOp Op_gcdn.
-Add Zify BinOp Op_lcmn.
-Add Zify BinOp Op_coprime.
 Add Zify BinOp Op_gcdz.
 Add Zify BinOp Op_coprimez.
-Add Zify BinOp Op_natdvd_le.
-Add Zify BinOp Op_natdvd_le'.
-Add Zify BinOp Op_natdvd_ge.
-Add Zify BinOp Op_natdvd_ge'.
-Add Zify BinOp Op_natdvd_lt.
-Add Zify BinOp Op_natdvd_lt'.
-Add Zify BinOp Op_natdvd_gt.
-Add Zify BinOp Op_natdvd_gt'.
-Add Zify BinOp Op_natdvd_meet.
-Add Zify BinOp Op_natdvd_meet'.
-Add Zify BinOp Op_natdvd_join.
-Add Zify BinOp Op_natdvd_join'.
-Add Zify CstOp Op_natdvd_bottom.
-Add Zify CstOp Op_natdvd_top.
 End Exports.
+
+End AlgebraZifyInstances.
+Export AlgebraZifyInstances.Exports.
