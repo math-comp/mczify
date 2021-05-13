@@ -1,5 +1,1 @@
-theories/zify_ssreflect.v
-theories/zify_algebra.v
-theories/zify.v
-
 -R theories mathcomp.zify

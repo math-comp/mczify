@@ -7,9 +7,6 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-Lemma odd_add (n m : nat) : odd (m + n) = odd m (+) odd n.
-Proof. lia. Qed.
-
 Lemma dvdz_lcm_6_4 (m : int) : (6 %| m -> 4 %| m -> 12 %| m)%Z.
 Proof. lia. Qed.
 

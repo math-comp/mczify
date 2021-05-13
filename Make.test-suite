@@ -1,0 +1,4 @@
+examples/boolean.v
+examples/divmod.v
+
+-I .
