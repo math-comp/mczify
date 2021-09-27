@@ -1,4 +1,5 @@
 examples/boolean.v
 examples/divmod.v
+examples/zagier.v
 
 -I .
