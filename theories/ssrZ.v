@@ -87,7 +87,7 @@ Fact leZ_add m n : Z.leb 0 m -> Z.leb 0 n -> Z.leb 0 (m + n). Proof. lia. Qed.
 Fact leZ_mul m n : Z.leb 0 m -> Z.leb 0 n -> Z.leb 0 (m * n). Proof. lia. Qed.
 Fact leZ_anti m : Z.leb 0 m -> Z.leb m 0 -> m = Z0. Proof. lia. Qed.
 
-Lemma subZ_ge0 m n : Z.leb 0 (n - m)%R = Z.leb m n.
+Fact subZ_ge0 m n : Z.leb 0 (n - m)%R = Z.leb m n.
 Proof. by rewrite /GRing.add /GRing.opp /=; lia. Qed.
 
 Fact leZ_total m n : Z.leb m n || Z.leb n m. Proof. lia. Qed.
@@ -111,7 +111,7 @@ Canonical Z_numDomainType := NumDomainType Z Mixin.
 Canonical Z_normedZmodType := NormedZmodType Z Z Mixin.
 Canonical Z_realDomainType := [realDomainType of Z].
 
-Lemma Z_of_intE (n : int) : Z_of_int n = (n%:~R)%R.
+Fact Z_of_intE (n : int) : Z_of_int n = (n%:~R)%R.
 Proof.
 have Hnat (m : nat) : Z.of_nat m = (m%:R)%R.
   by elim: m => // m; rewrite Nat2Z.inj_succ -Z.add_1_l mulrS => ->.
@@ -119,22 +119,22 @@ case: n => n; rewrite /intmul /=; first exact: Hnat.
 by congr Z.opp; rewrite Nat2Z.inj_add /= mulrSr Hnat.
 Qed.
 
-Lemma Z_of_int_is_additive : additive Z_of_int.
+Fact Z_of_int_is_additive : additive Z_of_int.
 Proof. by move=> m n; rewrite !Z_of_intE raddfB. Qed.
 
 Canonical Z_of_int_additive := Additive Z_of_int_is_additive.
 
-Lemma int_of_Z_is_additive : additive int_of_Z.
+Fact int_of_Z_is_additive : additive int_of_Z.
 Proof. exact: can2_additive Z_of_intK int_of_ZK. Qed.
 
 Canonical int_of_Z_additive := Additive int_of_Z_is_additive.
 
-Lemma Z_of_int_is_multiplicative : multiplicative Z_of_int.
+Fact Z_of_int_is_multiplicative : multiplicative Z_of_int.
 Proof. by split => // n m; rewrite !Z_of_intE rmorphM. Qed.
 
 Canonical Z_of_int_rmorphism := AddRMorphism Z_of_int_is_multiplicative.
 
-Lemma int_of_Z_is_multiplicative : multiplicative int_of_Z.
+Fact int_of_Z_is_multiplicative : multiplicative int_of_Z.
 Proof. exact: can2_rmorphism Z_of_intK int_of_ZK. Qed.
 
 Canonical int_of_Z_rmorphism := AddRMorphism int_of_Z_is_multiplicative.
