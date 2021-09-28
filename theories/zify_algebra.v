@@ -53,15 +53,13 @@ Add Zify BinOp Op_int_eq_op.
 Instance Op_int_0 : CstOp (0%R : int) := { TCst := 0%Z; TCstInj := erefl }.
 Add Zify CstOp Op_int_0.
 
-Instance Op_addz : BinOp intZmod.addz :=
-  { TBOp := Z.add; TBOpInj := ltac:(case=> ? [] ? /=; try case: leqP; lia) }.
+Instance Op_addz : BinOp intZmod.addz := { TBOp := Z.add; TBOpInj := raddfD _ }.
 Add Zify BinOp Op_addz.
 
 Instance Op_int_add : BinOp +%R := Op_addz.
 Add Zify BinOp Op_int_add.
 
-Instance Op_oppz : UnOp intZmod.oppz :=
-  { TUOp := Z.opp; TUOpInj := ltac:(case=> [[|?]|?] /=; lia) }.
+Instance Op_oppz : UnOp intZmod.oppz := { TUOp := Z.opp; TUOpInj := raddfN _ }.
 Add Zify UnOp Op_oppz.
 
 Instance Op_int_opp : UnOp (@GRing.opp _) := Op_oppz.
@@ -71,7 +69,7 @@ Instance Op_int_1 : CstOp (1%R : int) := { TCst := 1%Z; TCstInj := erefl }.
 Add Zify CstOp Op_int_1.
 
 Instance Op_mulz : BinOp intRing.mulz :=
-  { TBOp := Z.mul; TBOpInj := ltac:(case=> ? [] ? /=; lia) }.
+  { TBOp := Z.mul; TBOpInj := rmorphM _ }.
 Add Zify BinOp Op_mulz.
 
 Instance Op_int_mulr : BinOp *%R := Op_mulz.
@@ -90,8 +88,7 @@ Instance Op_int_scale : BinOp (@GRing.scale _ [lmodType int of int^o]) :=
   Op_mulz.
 Add Zify BinOp Op_int_scale.
 
-Lemma Op_int_exp_subproof n m :
-  Z_of_int (n ^+ m) = (Z_of_int n ^ Z.of_nat m)%Z.
+Lemma Op_int_exp_subproof n m : Z_of_int (n ^+ m) = (Z_of_int n ^ Z.of_nat m)%Z.
 Proof. rewrite -Zpower_nat_Z; elim: m => //= m <-; rewrite exprS; lia. Qed.
 
 Instance Op_int_exp : BinOp (@GRing.exp _ : int -> nat -> int) :=
