@@ -12,9 +12,9 @@ license: "CECILL-B"
 
 synopsis: "Micromega tactics for Mathematical Components"
 description: """
-This small library enables the use of the Micromega tactics for goals stated
-with the definitions of the Mathematical Components library by extending the
-zify tactic."""
+This small library enables the use of the Micromega arithmetic solvers of Coq
+for goals stated with the definitions of the Mathematical Components library
+by extending the zify tactic."""
 
 build: [make "-j%{jobs}%" ]
 install: [make "install"]
