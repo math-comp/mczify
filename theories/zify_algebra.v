@@ -327,7 +327,7 @@ Instance Op_modz : BinOp modz :=
 Add Zify BinOp Op_modz.
 
 Instance Op_dvdz : BinOp dvdz :=
-  { TBOp n m := Z.eqb (modZ m n) 0%Z;
+  { TBOp n m := (modZ m n =? 0)%Z;
     TBOpInj _ _ := ltac:(apply/dvdz_mod0P/idP; lia) }.
 Add Zify BinOp Op_dvdz.
 
@@ -339,7 +339,7 @@ Instance Op_gcdz : BinOp gcdz := { TBOp := Z.gcd; TBOpInj := Op_gcdz_subproof }.
 Add Zify BinOp Op_gcdz.
 
 Instance Op_coprimez : BinOp coprimez :=
-  { TBOp x y := Z.eqb (Z.gcd x y) 1%Z;
+  { TBOp x y := (Z.gcd x y =? 1)%Z;
     TBOpInj := ltac:(rewrite /= /coprimez; lia) }.
 Add Zify BinOp Op_coprimez.
 
