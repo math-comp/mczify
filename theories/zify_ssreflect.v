@@ -27,7 +27,7 @@ Add Zify UnOp Op_nat_inj.
 (******************************************************************************)
 
 Instance Op_addb : BinOp addb :=
-  { TBOp x y := Bool.eqb x (negb y); TBOpInj := ltac:(by case=> [][]) }.
+  { TBOp x y := Bool.eqb x (~~ y); TBOpInj := ltac:(by case=> [][]) }.
 Add Zify BinOp Op_addb.
 
 Instance Op_eqb : BinOp eqb :=
@@ -338,13 +338,11 @@ Instance Op_modn : BinOp modn :=
 Add Zify BinOp Op_modn.
 
 Instance Op_dvdn : BinOp dvdn :=
-  { TBOp x y := Z.eqb (modZ y x) 0%Z;
-    TBOpInj := ltac:(rewrite /dvdn; lia) }.
+  { TBOp x y := (modZ y x =? 0)%Z; TBOpInj := ltac:(rewrite /dvdn; lia) }.
 Add Zify BinOp Op_dvdn.
 
 Instance Op_odd : UnOp odd :=
-  { TUOp x := Z.eqb (modZ x 2) 1%Z;
-    TUOpInj n := ltac:(case: odd (modn2 n); lia) }.
+  { TUOp x := (modZ x 2 =? 1)%Z; TUOpInj n := ltac:(case: odd (modn2 n); lia) }.
 Add Zify UnOp Op_odd.
 
 Instance Op_half : UnOp half :=
@@ -384,7 +382,7 @@ Instance Op_lcmn : BinOp lcmn := { TBOp := Z.lcm; TBOpInj := Op_lcmn_subproof }.
 Add Zify BinOp Op_lcmn.
 
 Instance Op_coprime : BinOp coprime :=
-  { TBOp x y := Z.eqb (Z.gcd x y) 1%Z;
+  { TBOp x y := (Z.gcd x y =? 1)%Z;
     TBOpInj := ltac:(rewrite /= /coprime; lia) }.
 Add Zify BinOp Op_coprime.
 
@@ -399,14 +397,14 @@ Instance Op_natdvd_le' : BinOp (>=^d%O : rel natdvd^d) := Op_dvdn.
 Add Zify BinOp Op_natdvd_le'.
 
 Instance Op_natdvd_ge : BinOp ((>=%O : rel natdvd) : nat -> nat -> bool) :=
-  { TBOp x y := Z.eqb (modZ x y) 0%Z; TBOpInj := ltac:(simpl; lia) }.
+  { TBOp x y := (modZ x y =? 0)%Z; TBOpInj := ltac:(simpl; lia) }.
 Add Zify BinOp Op_natdvd_ge.
 
 Instance Op_natdvd_ge' : BinOp (<=^d%O : rel natdvd^d) := Op_natdvd_ge.
 Add Zify BinOp Op_natdvd_ge'.
 
 Instance Op_natdvd_lt : BinOp ((<%O : rel natdvd) : nat -> nat -> bool) :=
-  { TBOp x y := negb (Z.eqb y x) && Z.eqb (modZ y x) 0%Z;
+  { TBOp x y := ~~ (y =? x)%Z && (modZ y x =? 0)%Z;
     TBOpInj _ _ := ltac:(rewrite /= sdvdEnat; lia) }.
 Add Zify BinOp Op_natdvd_lt.
 
@@ -414,7 +412,7 @@ Instance Op_natdvd_lt' : BinOp (>^d%O : rel natdvd^d) := Op_natdvd_lt.
 Add Zify BinOp Op_natdvd_lt'.
 
 Instance Op_natdvd_gt : BinOp ((>%O : rel natdvd) : nat -> nat -> bool) :=
-  { TBOp x y := negb (Z.eqb x y) && Z.eqb (modZ x y) 0%Z;
+  { TBOp x y := ~~ (x =? y)%Z && (modZ x y =? 0)%Z;
     TBOpInj _ _ := ltac:(rewrite /= sdvdEnat; lia) }.
 Add Zify BinOp Op_natdvd_gt.
 

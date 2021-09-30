@@ -91,6 +91,13 @@ Instance Op_int_exp : BinOp (@GRing.exp _ : int -> nat -> int) :=
   { TBOp := Z.pow; TBOpInj := Op_int_exp_subproof }.
 Add Zify BinOp Op_int_exp.
 
+Instance Op_unitz : UnOp (has_quality 1 intUnitRing.unitz : int -> bool) :=
+  { TUOp x := (x =? 1)%Z || (x =? - 1)%Z; TUOpInj := ltac:(simpl; lia) }.
+Add Zify UnOp Op_unitz.
+
+Instance Op_int_unit : UnOp (has_quality 1 GRing.unit) := Op_unitz.
+Add Zify UnOp Op_int_unit.
+
 Instance Op_invz : UnOp intUnitRing.invz :=
   { TUOp := id; TUOpInj _ := erefl }.
 Add Zify UnOp Op_invz.
@@ -223,6 +230,13 @@ Instance Op_Z_exp : BinOp (@GRing.exp _ : Z -> nat -> Z) :=
   { TBOp := Z.pow; TBOpInj := Op_Z_exp_subproof }.
 Add Zify BinOp Op_Z_exp.
 
+Instance Op_unitZ : UnOp (has_quality 1 ZInstances.unitZ : Z -> bool) :=
+  { TUOp x := (x =? 1)%Z || (x =? - 1)%Z; TUOpInj _ := erefl }.
+Add Zify UnOp Op_unitZ.
+
+Instance Op_Z_unit : UnOp (has_quality 1 GRing.unit : Z -> bool) := Op_unitZ.
+Add Zify UnOp Op_Z_unit.
+
 Instance Op_invZ : UnOp ZInstances.invZ := { TUOp := id; TUOpInj _ := erefl }.
 Add Zify UnOp Op_invZ.
 
@@ -313,7 +327,7 @@ Instance Op_modz : BinOp modz :=
 Add Zify BinOp Op_modz.
 
 Instance Op_dvdz : BinOp dvdz :=
-  { TBOp n m := Z.eqb (modZ m n) 0%Z;
+  { TBOp n m := (modZ m n =? 0)%Z;
     TBOpInj _ _ := ltac:(apply/dvdz_mod0P/idP; lia) }.
 Add Zify BinOp Op_dvdz.
 
@@ -325,7 +339,7 @@ Instance Op_gcdz : BinOp gcdz := { TBOp := Z.gcd; TBOpInj := Op_gcdz_subproof }.
 Add Zify BinOp Op_gcdz.
 
 Instance Op_coprimez : BinOp coprimez :=
-  { TBOp x y := Z.eqb (Z.gcd x y) 1%Z;
+  { TBOp x y := (Z.gcd x y =? 1)%Z;
     TBOpInj := ltac:(rewrite /= /coprimez; lia) }.
 Add Zify BinOp Op_coprimez.
 
@@ -348,6 +362,8 @@ Add Zify BinOp Op_int_natmul.
 Add Zify BinOp Op_int_intmul.
 Add Zify BinOp Op_int_scale.
 Add Zify BinOp Op_int_exp.
+Add Zify UnOp Op_unitz.
+Add Zify UnOp Op_int_unit.
 Add Zify UnOp Op_invz.
 Add Zify UnOp Op_int_inv.
 Add Zify UnOp Op_absz.
@@ -382,6 +398,8 @@ Add Zify BinOp Op_Z_natmul.
 Add Zify BinOp Op_Z_intmul.
 Add Zify BinOp Op_Z_scale.
 Add Zify BinOp Op_Z_exp.
+Add Zify UnOp Op_unitZ.
+Add Zify UnOp Op_Z_unit.
 Add Zify UnOp Op_invZ.
 Add Zify UnOp Op_Z_inv.
 Add Zify UnOp Op_Z_normr.
