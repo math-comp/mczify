@@ -12,9 +12,9 @@ Follow the instructions on https://github.com/coq-community/templates to regener
 
 
 
-This small library enables the use of the Micromega tactics for goals stated
-with the definitions of the Mathematical Components library by extending the
-zify tactic.
+This small library enables the use of the Micromega arithmetic solvers of Coq
+for goals stated with the definitions of the Mathematical Components library
+by extending the zify tactic.
 
 ## Meta
 
@@ -47,4 +47,12 @@ make install
 ```
 
 
+## File contents
 
+- `zify_ssreflect.v`: Z-ification instances for the `coq-mathcomp-ssreflect`
+  library
+- `zify_algebra.v`: Z-ification instances for the `coq-mathcomp-algebra`
+  library
+- `zify.v`: re-exports all the Z-ification instances
+- `ssrZ.v`: provides a minimal facility for reasoning about `Z` and relating
+  `Z` and `int`

@@ -16,7 +16,7 @@ Module SsreflectZifyInstances.
 Import Order.Theory.
 
 Instance Op_bool_inj : UnOp (inj : bool -> bool) :=
-  { TUOp := id; TUOpInj := fun => erefl }.
+  { TUOp := id; TUOpInj _ := erefl }.
 Add Zify UnOp Op_bool_inj.
 
 Instance Op_nat_inj : UnOp (inj : nat -> Z) := Op_Z_of_nat.
@@ -27,7 +27,7 @@ Add Zify UnOp Op_nat_inj.
 (******************************************************************************)
 
 Instance Op_addb : BinOp addb :=
-  { TBOp := fun x y => Bool.eqb x (negb y); TBOpInj := ltac:(by case=> [][]) }.
+  { TBOp x y := Bool.eqb x (negb y); TBOpInj := ltac:(by case=> [][]) }.
 Add Zify BinOp Op_addb.
 
 Instance Op_eqb : BinOp eqb :=
@@ -45,21 +45,21 @@ Instance Op_bool_le' : BinOp (>=^d%O : rel bool^d) := Op_bool_le.
 Add Zify BinOp Op_bool_le'.
 
 Instance Op_bool_ge : BinOp (>=%O : bool -> bool -> bool) :=
-  { TBOp := fun x y => implb y x; TBOpInj := ltac:(by case=> [][]) }.
+  { TBOp x y := implb y x; TBOpInj := ltac:(by case=> [][]) }.
 Add Zify BinOp Op_bool_ge.
 
 Instance Op_bool_ge' : BinOp (<=^d%O : rel bool^d) := Op_bool_ge.
 Add Zify BinOp Op_bool_ge'.
 
 Instance Op_bool_lt : BinOp (<%O : bool -> bool -> bool) :=
-  { TBOp := fun x y => ~~ x && y; TBOpInj := ltac:(by case=> [][]) }.
+  { TBOp x y := ~~ x && y; TBOpInj := ltac:(by case=> [][]) }.
 Add Zify BinOp Op_bool_lt.
 
 Instance Op_bool_lt' : BinOp (>^d%O : rel bool^d) := Op_bool_lt.
 Add Zify BinOp Op_bool_lt'.
 
 Instance Op_bool_gt : BinOp (>%O : bool -> bool -> bool) :=
-  { TBOp := fun x y => x && ~~ y; TBOpInj := ltac:(by case=> [][]) }.
+  { TBOp x y := x && ~~ y; TBOpInj := ltac:(by case=> [][]) }.
 Add Zify BinOp Op_bool_gt.
 
 Instance Op_bool_gt' : BinOp (<^d%O : rel bool^d) := Op_bool_gt.
@@ -108,7 +108,7 @@ Instance Op_bool_top' : CstOp (0%O : bool^d) := Op_true.
 Add Zify CstOp Op_bool_top'.
 
 Instance Op_bool_sub : BinOp (Order.sub : bool -> bool -> bool) :=
-  { TBOp := fun x y => x && ~~ y; TBOpInj := ltac:(by case=> [][]) }.
+  { TBOp x y := x && ~~ y; TBOpInj := ltac:(by case=> [][]) }.
 Add Zify BinOp Op_bool_sub.
 
 Instance Op_bool_compl : UnOp (Order.compl : bool -> bool) := Op_negb.
@@ -159,11 +159,11 @@ Instance Op_gtn : BinOp (gtn : nat -> nat -> bool) :=
 Add Zify BinOp Op_gtn.
 
 Instance Op_minn : BinOp minn :=
-  { TBOp := Z.min; TBOpInj := ltac:(move=> ? ?; case: leqP; lia) }.
+  { TBOp := Z.min; TBOpInj _ _ := ltac:(case: leqP; lia) }.
 Add Zify BinOp Op_minn.
 
 Instance Op_maxn : BinOp maxn :=
-  { TBOp := Z.max; TBOpInj := ltac:(move=> ? ?; case: leqP; lia) }.
+  { TBOp := Z.max; TBOpInj _ _ := ltac:(case: leqP; lia) }.
 Add Zify BinOp Op_maxn.
 
 Instance Op_nat_of_bool : UnOp nat_of_bool :=
@@ -171,10 +171,10 @@ Instance Op_nat_of_bool : UnOp nat_of_bool :=
 Add Zify UnOp Op_nat_of_bool.
 
 Instance Op_double : UnOp double :=
-  { TUOp := Z.mul 2; TUOpInj := ltac:(move=> ?; rewrite -muln2; lia) }.
+  { TUOp := Z.mul 2; TUOpInj _ := ltac:(rewrite -muln2; lia) }.
 Add Zify UnOp Op_double.
 
-Lemma Op_expn_subproof n m : Z.of_nat (n ^ m) = (Z.of_nat n ^ Z.of_nat m)%Z.
+Fact Op_expn_subproof n m : Z.of_nat (n ^ m) = (Z.of_nat n ^ Z.of_nat m)%Z.
 Proof. rewrite -Zpower_nat_Z; elim: m => //= m <-; rewrite expnS; lia. Qed.
 
 Instance Op_expn_rec : BinOp expn_rec :=
@@ -212,14 +212,14 @@ Instance Op_nat_min : BinOp (Order.min : nat -> _) := Op_minn.
 Add Zify BinOp Op_nat_min.
 
 Instance Op_nat_min' : BinOp ((Order.max : nat^d -> _) : nat -> nat -> nat) :=
-  { TBOp := Z.min; TBOpInj := ltac:(move=> ? ? /=; case: leP; lia) }.
+  { TBOp := Z.min; TBOpInj _ _ := ltac:(case: leP; lia) }.
 Add Zify BinOp Op_nat_min'.
 
 Instance Op_nat_max : BinOp (Order.max : nat -> _) := Op_maxn.
 Add Zify BinOp Op_nat_max.
 
 Instance Op_nat_max' : BinOp ((Order.min : nat^d -> _) : nat -> nat -> nat) :=
-  { TBOp := Z.max; TBOpInj := ltac:(move=> ? ? /=; case: leP; lia) }.
+  { TBOp := Z.max; TBOpInj _ _ := ltac:(case: leP; lia) }.
 Add Zify BinOp Op_nat_max'.
 
 Instance Op_nat_meet : BinOp (Order.meet : nat -> _) := Op_minn.
@@ -254,39 +254,39 @@ Definition divZ (m d : Z) : Z :=
 
 Definition modZ (m d : Z) : Z := (m - divZ m d * d)%Z.
 
-Instance Op_divZ : BinOp divZ := { TBOp := divZ; TBOpInj := fun _ _ => erefl }.
+Instance Op_divZ : BinOp divZ := { TBOp := divZ; TBOpInj _ _ := erefl }.
 Add Zify BinOp Op_divZ.
 
-Instance Op_modZ : BinOp modZ := { TBOp := modZ; TBOpInj := fun _ _ => erefl }.
+Instance Op_modZ : BinOp modZ := { TBOp := modZ; TBOpInj _ _ := erefl }.
 Add Zify BinOp Op_modZ.
 
 (* Reimplementation of Z.div_mod_to_equations (PreOmega.v) for divZ and modZ: *)
 
-Lemma divZ_eq m d : m = (divZ m d * d + modZ m d)%Z.
+Fact divZ_eq m d : m = (divZ m d * d + modZ m d)%Z.
 Proof. rewrite /modZ; lia. Qed.
 
-Lemma modZ_ge0 m d : d <> 0%Z -> (0 <= modZ m d)%Z.
+Fact modZ_ge0 m d : d <> 0%Z -> (0 <= modZ m d)%Z.
 Proof.
 by move: d m => [] // d [] // m _; rewrite /modZ /divZ [Z.abs_nat _]/=;
   move: (leq_trunc_div (Pos.to_nat m) (Pos.to_nat d));
   move: (@ltn_ceil (Pos.to_nat m).-1 (Pos.to_nat d)); lia.
 Qed.
 
-Lemma ltz_pmodZ m d : (0 < d)%Z -> (modZ m d < d)%Z.
+Fact ltz_pmodZ m d : (0 < d)%Z -> (modZ m d < d)%Z.
 Proof.
 by move: d m => [] // d [] // m _; rewrite /modZ /divZ [Z.abs_nat _]/=;
   move: (leq_trunc_div (Pos.to_nat m).-1 (Pos.to_nat d));
   move: (@ltn_ceil (Pos.to_nat m) (Pos.to_nat d)); lia.
 Qed.
 
-Lemma ltz_nmodZ m d : (d < 0)%Z -> (modZ m d < - d)%Z.
+Fact ltz_nmodZ m d : (d < 0)%Z -> (modZ m d < - d)%Z.
 Proof.
 move: d m => [] // d [] // m _; rewrite /modZ /divZ [Z.abs_nat _]/=;
   move: (leq_trunc_div (Pos.to_nat m).-1 (Pos.to_nat d));
   move: (@ltn_ceil (Pos.to_nat m) (Pos.to_nat d)); lia.
 Qed.
 
-Lemma divZ0 m d : d = 0%Z -> divZ m d = 0%Z.
+Fact divZ0 m d : d = 0%Z -> divZ m d = 0%Z.
 Proof. by move=> ->. Qed.
 
 Ltac divZ_modZ_to_equations :=
@@ -325,7 +325,7 @@ Ltac Zify.zify_post_hook ::= elim_bool_cstr; divZ_modZ_to_equations.
 (* div (divn, modn, dvdn, gcdn, lcmn, and coprime)                            *)
 (******************************************************************************)
 
-Lemma Op_divn_subproof n m : Z.of_nat (n %/ m) = divZ (Z.of_nat n) (Z.of_nat m).
+Fact Op_divn_subproof n m : Z.of_nat (n %/ m) = divZ (Z.of_nat n) (Z.of_nat m).
 Proof.
 by case: n m => [|n] [|m]; rewrite /divZ //= ?SuccNat2Pos.id_succ; case: divn.
 Qed.
@@ -334,30 +334,28 @@ Instance Op_divn : BinOp divn := { TBOp := divZ; TBOpInj := Op_divn_subproof }.
 Add Zify BinOp Op_divn.
 
 Instance Op_modn : BinOp modn :=
-  { TBOp := modZ; TBOpInj := ltac:(move=> n m; move: (divn_eq n m); lia) }.
+  { TBOp := modZ; TBOpInj n m := ltac:(move: (divn_eq n m); lia) }.
 Add Zify BinOp Op_modn.
 
 Instance Op_dvdn : BinOp dvdn :=
-  { TBOp := fun x y => Z.eqb (modZ y x) 0%Z;
+  { TBOp x y := Z.eqb (modZ y x) 0%Z;
     TBOpInj := ltac:(rewrite /dvdn; lia) }.
 Add Zify BinOp Op_dvdn.
 
 Instance Op_odd : UnOp odd :=
-  { TUOp := fun x => Z.eqb (modZ x 2) 1%Z;
-    TUOpInj := ltac:(move=> n; case: odd (modn2 n); lia) }.
+  { TUOp x := Z.eqb (modZ x 2) 1%Z;
+    TUOpInj n := ltac:(case: odd (modn2 n); lia) }.
 Add Zify UnOp Op_odd.
 
 Instance Op_half : UnOp half :=
-  { TUOp := fun x => divZ x 2;
-    TUOpInj := ltac:(move=> ?; rewrite -divn2; lia) }.
+  { TUOp x := divZ x 2; TUOpInj _ := ltac:(rewrite -divn2; lia) }.
 Add Zify UnOp Op_half.
 
 Instance Op_uphalf : UnOp uphalf :=
-  { TUOp := fun x => divZ (x + 1)%Z 2;
-    TUOpInj := ltac:(move=> ?; rewrite uphalf_half; lia) }.
+  { TUOp x := divZ (x + 1)%Z 2; TUOpInj _ := ltac:(rewrite uphalf_half; lia) }.
 Add Zify UnOp Op_uphalf.
 
-Lemma Op_gcdn_subproof n m :
+Fact Op_gcdn_subproof n m :
   Z.of_nat (gcdn n m) = Z.gcd (Z.of_nat n) (Z.of_nat m).
 Proof.
 apply/esym/Z.gcd_unique; first by case: gcdn.
@@ -373,7 +371,7 @@ Qed.
 Instance Op_gcdn : BinOp gcdn := { TBOp := Z.gcd; TBOpInj := Op_gcdn_subproof }.
 Add Zify BinOp Op_gcdn.
 
-Lemma Op_lcmn_subproof n m :
+Fact Op_lcmn_subproof n m :
   Z.of_nat (lcmn n m) = Z.lcm (Z.of_nat n) (Z.of_nat m).
 Proof.
 case: n m => [|n][|m]; rewrite ?lcmn0 // /lcmn /Z.lcm -Op_gcdn_subproof.
@@ -386,7 +384,7 @@ Instance Op_lcmn : BinOp lcmn := { TBOp := Z.lcm; TBOpInj := Op_lcmn_subproof }.
 Add Zify BinOp Op_lcmn.
 
 Instance Op_coprime : BinOp coprime :=
-  { TBOp := fun x y => Z.eqb (Z.gcd x y) 1%Z;
+  { TBOp x y := Z.eqb (Z.gcd x y) 1%Z;
     TBOpInj := ltac:(rewrite /= /coprime; lia) }.
 Add Zify BinOp Op_coprime.
 
@@ -401,23 +399,23 @@ Instance Op_natdvd_le' : BinOp (>=^d%O : rel natdvd^d) := Op_dvdn.
 Add Zify BinOp Op_natdvd_le'.
 
 Instance Op_natdvd_ge : BinOp ((>=%O : rel natdvd) : nat -> nat -> bool) :=
-  { TBOp := fun x y => Z.eqb (modZ x y) 0%Z; TBOpInj := ltac:(simpl; lia) }.
+  { TBOp x y := Z.eqb (modZ x y) 0%Z; TBOpInj := ltac:(simpl; lia) }.
 Add Zify BinOp Op_natdvd_ge.
 
 Instance Op_natdvd_ge' : BinOp (<=^d%O : rel natdvd^d) := Op_natdvd_ge.
 Add Zify BinOp Op_natdvd_ge'.
 
 Instance Op_natdvd_lt : BinOp ((<%O : rel natdvd) : nat -> nat -> bool) :=
-  { TBOp := fun x y => negb (Z.eqb y x) && Z.eqb (modZ y x) 0%Z;
-    TBOpInj := ltac:(move=> ? ? /=; rewrite sdvdEnat; lia) }.
+  { TBOp x y := negb (Z.eqb y x) && Z.eqb (modZ y x) 0%Z;
+    TBOpInj _ _ := ltac:(rewrite /= sdvdEnat; lia) }.
 Add Zify BinOp Op_natdvd_lt.
 
 Instance Op_natdvd_lt' : BinOp (>^d%O : rel natdvd^d) := Op_natdvd_lt.
 Add Zify BinOp Op_natdvd_lt'.
 
 Instance Op_natdvd_gt : BinOp ((>%O : rel natdvd) : nat -> nat -> bool) :=
-  { TBOp := fun x y => negb (Z.eqb x y) && Z.eqb (modZ x y) 0%Z;
-    TBOpInj := ltac:(move=> ? ? /=; rewrite sdvdEnat; lia) }.
+  { TBOp x y := negb (Z.eqb x y) && Z.eqb (modZ x y) 0%Z;
+    TBOpInj _ _ := ltac:(rewrite /= sdvdEnat; lia) }.
 Add Zify BinOp Op_natdvd_gt.
 
 Instance Op_natdvd_gt' : BinOp (<^d%O : rel natdvd^d) := Op_natdvd_gt.
