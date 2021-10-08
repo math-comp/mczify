@@ -3,3 +3,4 @@ examples/divmod.v
 examples/zagier.v
 
 -I .
+-arg -w -arg -notation-overridden

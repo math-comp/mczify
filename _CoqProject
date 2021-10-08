@@ -1,1 +1,2 @@
 -R theories mathcomp.zify
+-arg -w -arg -notation-overridden
