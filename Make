@@ -4,3 +4,4 @@ theories/zify_algebra.v
 theories/zify.v
 
 -R theories mathcomp.zify
+-arg -w -arg -notation-overridden
