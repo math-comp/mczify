@@ -14,7 +14,7 @@ TEST_DEP :=
 LIBRARY_PATH :=
 else
 TEST_DEP := invoke-coqmakefile
-LIBRARY_PATH := -R theories mathcomp.algebra_tactics
+LIBRARY_PATH := -R theories mathcomp.zify
 endif
 
 COQMAKEFILE       = $(COQBIN)coq_makefile
