@@ -130,6 +130,10 @@ Add Zify BinOp Op_addn_rec.
 Instance Op_addn : BinOp addn := Op_plus.
 Add Zify BinOp Op_addn.
 
+Instance Op_addn_trec : BinOp NatTrec.add :=
+  { TBOp := Z.add; TBOpInj n m := ltac:(rewrite NatTrec.addE; lia) }.
+Add Zify BinOp Op_addn_trec.
+
 Instance Op_subn_rec : BinOp subn_rec := Op_sub.
 Add Zify BinOp Op_subn_rec.
 
@@ -141,6 +145,10 @@ Add Zify BinOp Op_muln_rec.
 
 Instance Op_muln : BinOp muln := Op_mul.
 Add Zify BinOp Op_muln.
+
+Instance Op_muln_trec : BinOp NatTrec.mul :=
+  { TBOp := Z.mul; TBOpInj n m := ltac:(rewrite NatTrec.mulE; lia) }.
+Add Zify BinOp Op_muln_trec.
 
 Instance Op_leq : BinOp leq :=
   { TBOp := Z.leb; TBOpInj := ltac:(rewrite /leq; lia) }.
@@ -174,6 +182,10 @@ Instance Op_double : UnOp double :=
   { TUOp := Z.mul 2; TUOpInj _ := ltac:(rewrite -muln2; lia) }.
 Add Zify UnOp Op_double.
 
+Instance Op_double_trec : UnOp NatTrec.double :=
+  { TUOp := Z.mul 2; TUOpInj _ := ltac:(rewrite NatTrec.doubleE; lia) }.
+Add Zify UnOp Op_double_trec.
+
 Fact Op_expn_subproof n m : Z.of_nat (n ^ m) = (Z.of_nat n ^ Z.of_nat m)%Z.
 Proof. rewrite -Zpower_nat_Z; elim: m => //= m <-; rewrite expnS; lia. Qed.
 
@@ -183,6 +195,28 @@ Add Zify BinOp Op_expn_rec.
 
 Instance Op_expn : BinOp expn := Op_expn_rec.
 Add Zify BinOp Op_expn.
+
+Instance Op_expn_trec : BinOp NatTrec.exp :=
+  { TBOp := Z.pow; TBOpInj n m := ltac:(rewrite NatTrec.expE; lia) }.
+Add Zify BinOp Op_expn_trec.
+
+Fact nat_of_posE : nat_of_pos =1 Pos.to_nat.
+Proof.
+move=> p; rewrite /Pos.to_nat -[LHS]muln1.
+elim: p 1 => /= [p IHp | p IHp |] n; rewrite -?IHp; lia.
+Qed.
+
+Instance Op_nat_of_pos : UnOp nat_of_pos :=
+  { TUOp := id; TUOpInj n := ltac:(rewrite /= nat_of_posE; lia) }.
+Add Zify UnOp Op_nat_of_pos.
+
+Instance Op_nat_of_bin : UnOp nat_of_bin :=
+  { TUOp := id; TUOpInj := ltac:(case => //=; lia) }.
+Add Zify UnOp Op_nat_of_bin.
+
+Instance Op_bin_of_nat : UnOp bin_of_nat :=
+  { TUOp := id; TUOpInj n := ltac:(rewrite /= -[n in RHS]bin_of_natK; lia) }.
+Add Zify UnOp Op_bin_of_nat.
 
 Instance Op_nat_le : BinOp (<=%O : rel nat) := Op_leq.
 Add Zify BinOp Op_nat_le.
@@ -345,6 +379,11 @@ Instance Op_odd : UnOp odd :=
   { TUOp x := (modZ x 2 =? 1)%Z; TUOpInj n := ltac:(case: odd (modn2 n); lia) }.
 Add Zify UnOp Op_odd.
 
+Instance Op_odd_trec : UnOp NatTrec.odd :=
+  { TUOp x := (modZ x 2 =? 1)%Z;
+    TUOpInj n := ltac:(rewrite NatTrec.oddE; lia) }.
+Add Zify UnOp Op_odd_trec.
+
 Instance Op_half : UnOp half :=
   { TUOp x := divZ x 2; TUOpInj _ := ltac:(rewrite -divn2; lia) }.
 Add Zify UnOp Op_half.
@@ -470,10 +509,12 @@ Add Zify BinOp Op_eqn.
 Add Zify BinOp Op_eq_op_nat.
 Add Zify BinOp Op_addn_rec.
 Add Zify BinOp Op_addn.
+Add Zify BinOp Op_addn_trec.
 Add Zify BinOp Op_subn_rec.
 Add Zify BinOp Op_subn.
 Add Zify BinOp Op_muln_rec.
 Add Zify BinOp Op_muln.
+Add Zify BinOp Op_muln_trec.
 Add Zify BinOp Op_leq.
 Add Zify BinOp Op_geq.
 Add Zify BinOp Op_ltn.
@@ -482,8 +523,13 @@ Add Zify BinOp Op_minn.
 Add Zify BinOp Op_maxn.
 Add Zify UnOp Op_nat_of_bool.
 Add Zify UnOp Op_double.
+Add Zify UnOp Op_double_trec.
 Add Zify BinOp Op_expn_rec.
 Add Zify BinOp Op_expn.
+Add Zify BinOp Op_expn_trec.
+Add Zify UnOp Op_nat_of_pos.
+Add Zify UnOp Op_nat_of_bin.
+Add Zify UnOp Op_bin_of_nat.
 Add Zify BinOp Op_nat_le.
 Add Zify BinOp Op_nat_le'.
 Add Zify BinOp Op_nat_ge.
@@ -507,6 +553,7 @@ Add Zify BinOp Op_divn.
 Add Zify BinOp Op_modn.
 Add Zify BinOp Op_dvdn.
 Add Zify UnOp Op_odd.
+Add Zify UnOp Op_odd_trec.
 Add Zify UnOp Op_half.
 Add Zify UnOp Op_uphalf.
 Add Zify BinOp Op_gcdn.
