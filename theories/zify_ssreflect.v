@@ -214,6 +214,14 @@ Instance Op_nat_of_bin : UnOp nat_of_bin :=
   { TUOp := id; TUOpInj := ltac:(case => //=; lia) }.
 Add Zify UnOp Op_nat_of_bin.
 
+Fact pos_of_natE n m : pos_of_nat n m = Pos.of_succ_nat (n * 2 - m).
+Proof. elim: n m => // n IHn [|[|m]] /=; rewrite IHn; lia. Qed.
+
+Instance Op_pos_of_nat : BinOp pos_of_nat :=
+  { TBOp n m := Z.max 1 (n * 2 - m + 1);
+    TBOpInj n m := ltac:(rewrite /= pos_of_natE; lia) }.
+Add Zify BinOp Op_pos_of_nat.
+
 Instance Op_bin_of_nat : UnOp bin_of_nat :=
   { TUOp := id; TUOpInj n := ltac:(rewrite /= -[n in RHS]bin_of_natK; lia) }.
 Add Zify UnOp Op_bin_of_nat.
@@ -529,6 +537,7 @@ Add Zify BinOp Op_expn.
 Add Zify BinOp Op_expn_trec.
 Add Zify UnOp Op_nat_of_pos.
 Add Zify UnOp Op_nat_of_bin.
+Add Zify BinOp Op_pos_of_nat.
 Add Zify UnOp Op_bin_of_nat.
 Add Zify BinOp Op_nat_le.
 Add Zify BinOp Op_nat_le'.
