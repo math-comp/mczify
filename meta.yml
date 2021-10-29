@@ -26,7 +26,7 @@ license:
 
 supported_coq_versions:
   text: 8.13 or later
-  opam: '{(>= "8.13" & < "8.15~") | (= "dev")}'
+  opam: '{>= "8.13"}'
 
 tested_coq_nix_versions:
 
@@ -34,6 +34,8 @@ tested_coq_opam_versions:
 - version: '1.12.0-coq-8.13'
   repo: 'mathcomp/mathcomp'
 - version: '1.12.0-coq-8.14'
+  repo: 'mathcomp/mathcomp'
+- version: '1.13.0-coq-dev'
   repo: 'mathcomp/mathcomp'
 - version: 'coq-8.13'
   repo: 'mathcomp/mathcomp-dev'
@@ -45,7 +47,7 @@ tested_coq_opam_versions:
 dependencies:
 - opam:
     name: coq-mathcomp-algebra
-    version: '{(>= "1.12" & < "1.13~") | (= "dev")}'
+    version: '{>= "1.12"}'
   nix: mathcomp-algebra
   description: |-
     [MathComp](https://math-comp.github.io) 1.12.0 or later
