@@ -34,7 +34,7 @@ Instance Op_eqb : BinOp eqb :=
   { TBOp := Bool.eqb; TBOpInj := ltac:(by case=> [][]) }.
 Add Zify BinOp Op_eqb.
 
-Instance Op_eq_op_bool : BinOp (@eq_op bool_eqType) := Op_eqb.
+Instance Op_eq_op_bool : BinOp (eq_op : rel bool) := Op_eqb.
 Add Zify BinOp Op_eq_op_bool.
 
 Instance Op_bool_le : BinOp (<=%O : bool -> bool -> bool) :=
@@ -121,7 +121,7 @@ Add Zify UnOp Op_bool_compl.
 Instance Op_eqn : BinOp eqn := Op_nat_eqb.
 Add Zify BinOp Op_eqn.
 
-Instance Op_eq_op_nat : BinOp (@eq_op nat_eqType) := Op_eqn.
+Instance Op_eq_op_nat : BinOp (eq_op : rel nat) := Op_eqn.
 Add Zify BinOp Op_eq_op_nat.
 
 Instance Op_addn_rec : BinOp addn_rec := Op_plus.
@@ -199,6 +199,10 @@ Add Zify BinOp Op_expn.
 Instance Op_expn_trec : BinOp NatTrec.exp :=
   { TBOp := Z.pow; TBOpInj n m := ltac:(rewrite NatTrec.expE; lia) }.
 Add Zify BinOp Op_expn_trec.
+
+Instance Op_eq_op_N : BinOp (eq_op : N -> N -> bool) :=
+  { TBOp := Z.eqb; TBOpInj := ltac:(by case => [|n] []) }.
+Add Zify BinOp Op_eq_op_N.
 
 Fact nat_of_posE : nat_of_pos =1 Pos.to_nat.
 Proof.
@@ -535,6 +539,7 @@ Add Zify UnOp Op_double_trec.
 Add Zify BinOp Op_expn_rec.
 Add Zify BinOp Op_expn.
 Add Zify BinOp Op_expn_trec.
+Add Zify BinOp Op_eq_op_N.
 Add Zify UnOp Op_nat_of_pos.
 Add Zify UnOp Op_nat_of_bin.
 Add Zify BinOp Op_pos_of_nat.
