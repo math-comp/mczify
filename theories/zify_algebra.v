@@ -1,4 +1,4 @@
-From Coq Require Import ZArith ZifyClasses Zify ZifyInst ZifyBool.
+From Coq Require Import ZArith ZifyClasses ZifyBool.
 From Coq Require Export Lia.
 
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq path.
