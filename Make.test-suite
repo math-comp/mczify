@@ -1,6 +1,8 @@
 examples/boolean.v
 examples/divmod.v
 examples/zagier.v
+examples/test_ssreflect.v
+examples/test_algebra.v
 
 -I .
 -arg -w -arg -notation-overridden

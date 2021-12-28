@@ -486,8 +486,14 @@ Instance Op_natdvd_bottom : CstOp (0%O : natdvd) :=
   { TCst := 1%Z; TCstInj := erefl }.
 Add Zify CstOp Op_natdvd_bottom.
 
+Instance Op_natdvd_bottom' : CstOp (1%O : natdvd^d) := Op_natdvd_bottom.
+Add Zify CstOp Op_natdvd_bottom'.
+
 Instance Op_natdvd_top : CstOp (1%O : natdvd) := Op_O.
 Add Zify CstOp Op_natdvd_top.
+
+Instance Op_natdvd_top' : CstOp (0%O : natdvd^d) := Op_O.
+Add Zify CstOp Op_natdvd_top'.
 
 Module Exports.
 (* Add Zify UnOp Op_bool_inj. *)
@@ -586,7 +592,9 @@ Add Zify BinOp Op_natdvd_meet'.
 Add Zify BinOp Op_natdvd_join.
 Add Zify BinOp Op_natdvd_join'.
 Add Zify CstOp Op_natdvd_bottom.
+Add Zify CstOp Op_natdvd_bottom'.
 Add Zify CstOp Op_natdvd_top.
+Add Zify CstOp Op_natdvd_top'.
 End Exports.
 
 End SsreflectZifyInstances.
