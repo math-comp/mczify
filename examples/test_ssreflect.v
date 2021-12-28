@@ -238,4 +238,92 @@ Proof. zify_op; reflexivity. Qed.
 Fact test_bottom_nat : Z.of_nat 0%O = 0%Z.
 Proof. zify_op; reflexivity. Qed.
 
-(* TODO: division / modulo *)
+(******************************************************************************)
+(* div (divn, modn, dvdn, gcdn, lcmn, and coprime)                            *)
+(******************************************************************************)
+
+Notation divZ := zify_ssreflect.SsreflectZifyInstances.divZ.
+Notation modZ := zify_ssreflect.SsreflectZifyInstances.modZ.
+
+Fact test_divn n m : Z.of_nat (divn n m) = divZ (Z.of_nat n) (Z.of_nat m).
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_modn n m : Z.of_nat (modn n m) = modZ (Z.of_nat n) (Z.of_nat m).
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_dvdn n m : dvdn n m = (modZ (Z.of_nat m) (Z.of_nat n) =? 0)%Z.
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_odd n : odd n = (modZ (Z.of_nat n) 2 =? 1)%Z.
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_odd_trec n : NatTrec.odd n = (modZ (Z.of_nat n) 2 =? 1)%Z.
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_half n : Z.of_nat (half n) = divZ (Z.of_nat n) 2.
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_uphalf n : Z.of_nat (uphalf n) = divZ (Z.of_nat n + 1) 2.
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_gcdn n m : Z.of_nat (gcdn n m) = Z.gcd (Z.of_nat n) (Z.of_nat m).
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_lcmn n m : Z.of_nat (lcmn n m) = Z.lcm (Z.of_nat n) (Z.of_nat m).
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_coprime n m : coprime n m = (Z.gcd (Z.of_nat n) (Z.of_nat m) =? 1)%Z.
+Proof. zify_op; reflexivity. Qed.
+
+(******************************************************************************)
+(* natdvd in order.v                                                          *)
+(******************************************************************************)
+
+Fact test_le_natdvd (n m : natdvd) :
+  (n <= m)%O = (modZ (Z.of_nat m) (Z.of_nat n) =? 0)%Z.
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_lt_natdvd (n m : natdvd) :
+  (n < m)%O =
+    ~~ (Z.of_nat m =? Z.of_nat n)%Z && (modZ (Z.of_nat m) (Z.of_nat n) =? 0)%Z.
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_dual_le_natdvd (n m : natdvd^d) :
+  (m <= n)%O = (modZ (Z.of_nat m) (Z.of_nat n) =? 0)%Z.
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_dual_lt_natdvd (n m : natdvd^d) :
+  (m < n)%O =
+    ~~ (Z.of_nat m =? Z.of_nat n)%Z && (modZ (Z.of_nat m) (Z.of_nat n) =? 0)%Z.
+Proof. zify_op; reflexivity. Qed.
+
+(* FIXME: ge, gt *)
+
+Fact test_meet_natdvd (n m : natdvd) :
+  Z.of_nat (n `&` m)%O = Z.gcd (Z.of_nat n) (Z.of_nat m).
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_join_natdvd (n m : natdvd) :
+  Z.of_nat (n `|` m)%O = Z.lcm (Z.of_nat n) (Z.of_nat m).
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_dual_meet_natdvd (n m : natdvd^d) :
+  Z.of_nat (n `&` m)%O = Z.lcm (Z.of_nat n) (Z.of_nat m).
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_dual_join_natdvd (n m : natdvd^d) :
+  Z.of_nat (n `|` m)%O = Z.gcd (Z.of_nat n) (Z.of_nat m).
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_bottom_natdvd : Z.of_nat (0%O : natdvd) = 1%Z.
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_top_natdvd : Z.of_nat (1%O : natdvd) = 0%Z.
+Proof. zify_op; reflexivity. Qed.
+
+(* FIXME: Notations 0^d and 1^d are broken. *)
+Fact test_dual_bottom_natdvd : Z.of_nat (0%O : natdvd^d) = 0%Z.
+Proof. zify_op; reflexivity. Qed.
+
+Fact test_dual_top_natdvd : Z.of_nat (1%O : natdvd^d) = 1%Z.
+Proof. zify_op; reflexivity. Qed.
