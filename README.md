@@ -23,7 +23,8 @@ by extending the zify tactic.
 - License: [CeCILL-B Free Software License Agreement](CeCILL-B)
 - Compatible Coq versions: 8.13 or later
 - Additional dependencies:
-  - [MathComp](https://math-comp.github.io) 1.12.0 or later
+  - [MathComp](https://math-comp.github.io) ssreflect 1.12 or later
+  - [MathComp](https://math-comp.github.io) algebra
 - Coq namespace: `mathcomp.zify`
 - Related publication(s): none
 
