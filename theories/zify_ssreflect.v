@@ -133,7 +133,7 @@ Instance Op_bool_top' : CstOp (Order.bottom : bool^d) := Op_true.
 Add Zify CstOp Op_bool_top'.
 
 #[global]
-Instance Op_bool_sub : BinOp (Order.sub : bool -> bool -> bool) :=
+Instance Op_bool_sub : BinOp (Order.diff : bool -> bool -> bool) :=
   { TBOp x y := x && ~~ y; TBOpInj := ltac:(by case=> [][]) }.
 Add Zify BinOp Op_bool_sub.
 

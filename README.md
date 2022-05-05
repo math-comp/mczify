@@ -21,9 +21,9 @@ by extending the zify tactic.
 - Author(s):
   - Kazuhiko Sakaguchi (initial)
 - License: [CeCILL-B Free Software License Agreement](CeCILL-B)
-- Compatible Coq versions: 8.13 or later
+- Compatible Coq versions: 8.16 or later
 - Additional dependencies:
-  - [MathComp](https://math-comp.github.io) ssreflect 1.12 or later
+  - [MathComp](https://math-comp.github.io) ssreflect 2.0 or later
   - [MathComp](https://math-comp.github.io) algebra
 - Coq namespace: `mathcomp.zify`
 - Related publication(s): none
