@@ -117,19 +117,19 @@ Instance Op_bool_join' : BinOp (Order.meet : bool^d -> _) := Op_orb.
 Add Zify BinOp Op_bool_join'.
 
 #[global]
-Instance Op_bool_bottom : CstOp (0%O : bool) := Op_false.
+Instance Op_bool_bottom : CstOp (Order.bottom : bool) := Op_false.
 Add Zify CstOp Op_bool_bottom.
 
 #[global]
-Instance Op_bool_bottom' : CstOp (1%O : bool^d) := Op_false.
+Instance Op_bool_bottom' : CstOp (Order.top : bool^d) := Op_false.
 Add Zify CstOp Op_bool_bottom'.
 
 #[global]
-Instance Op_bool_top : CstOp (1%O : bool) := Op_true.
+Instance Op_bool_top : CstOp (Order.top : bool) := Op_true.
 Add Zify CstOp Op_bool_top.
 
 #[global]
-Instance Op_bool_top' : CstOp (0%O : bool^d) := Op_true.
+Instance Op_bool_top' : CstOp (Order.bottom : bool^d) := Op_true.
 Add Zify CstOp Op_bool_top'.
 
 #[global]
@@ -351,7 +351,7 @@ Instance Op_nat_join' : BinOp (Order.meet : nat^d -> _) := Op_maxn.
 Add Zify BinOp Op_nat_join'.
 
 #[global]
-Instance Op_nat_bottom : CstOp (0%O : nat) := Op_O.
+Instance Op_nat_bottom : CstOp (Order.bottom : nat) := Op_O.
 Add Zify CstOp Op_nat_bottom.
 
 (******************************************************************************)
@@ -578,20 +578,20 @@ Instance Op_natdvd_join' : BinOp (Order.meet : natdvd^d -> _) := Op_lcmn.
 Add Zify BinOp Op_natdvd_join'.
 
 #[global]
-Instance Op_natdvd_bottom : CstOp (0%O : natdvd) :=
+Instance Op_natdvd_bottom : CstOp (Order.bottom : natdvd) :=
   { TCst := 1%Z; TCstInj := erefl }.
 Add Zify CstOp Op_natdvd_bottom.
 
 #[global]
-Instance Op_natdvd_bottom' : CstOp (1%O : natdvd^d) := Op_natdvd_bottom.
+Instance Op_natdvd_bottom' : CstOp (Order.top : natdvd^d) := Op_natdvd_bottom.
 Add Zify CstOp Op_natdvd_bottom'.
 
 #[global]
-Instance Op_natdvd_top : CstOp (1%O : natdvd) := Op_O.
+Instance Op_natdvd_top : CstOp (Order.top : natdvd) := Op_O.
 Add Zify CstOp Op_natdvd_top.
 
 #[global]
-Instance Op_natdvd_top' : CstOp (0%O : natdvd^d) := Op_O.
+Instance Op_natdvd_top' : CstOp (Order.bottom : natdvd^d) := Op_O.
 Add Zify CstOp Op_natdvd_top'.
 
 Module Exports.
