@@ -49,7 +49,7 @@ Instance Op_int_eq : BinRel (@eq int) :=
 Add Zify BinRel Op_int_eq.
 
 #[global]
-Instance Op_int_eq_op : BinOp (@eq_op int_eqType : int -> int -> bool) :=
+Instance Op_int_eq_op : BinOp (@eq_op int : int -> int -> bool) :=
   { TBOp := Z.eqb;
     TBOpInj := ltac:(move=> [] ? [] ?; do 2 rewrite eqE /=; lia) }.
 Add Zify BinOp Op_int_eq_op.
@@ -98,7 +98,7 @@ Instance Op_int_intmul : BinOp ( *~%R%R : int -> int -> int) :=
 Add Zify BinOp Op_int_intmul.
 
 #[global]
-Instance Op_int_scale : BinOp (@GRing.scale _ [lmodType int of int^o]) :=
+Instance Op_int_scale : BinOp (@GRing.scale _ int^o) :=
   Op_mulz.
 Add Zify BinOp Op_int_scale.
 
@@ -274,7 +274,8 @@ Instance Op_Z_intmul : BinOp ( *~%R%R : Z -> int -> Z) :=
 Add Zify BinOp Op_Z_intmul.
 
 #[global]
-Instance Op_Z_scale : BinOp (@GRing.scale _ [lmodType Z of Z^o]) := Op_Z_mulr.
+Instance Op_Z_scale : BinOp (@GRing.scale _ Z^o) :=
+  Op_Z_mulr.
 Add Zify BinOp Op_Z_scale.
 
 Fact Op_Z_exp_subproof n m : (n ^+ m)%R = (n ^ Z.of_nat m)%Z.
