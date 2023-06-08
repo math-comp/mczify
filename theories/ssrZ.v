@@ -35,7 +35,64 @@ case=> [[|n]|n] //=.
 rewrite addnC /=; congr Negz; lia.
 Qed.
 
-Module ZInstances.
+Module Instances.
+
+(* Instances taken from math-comp/math-comp#1031, authored by Pierre Roux *)
+(* TODO: remove them when we drop support for MathComp 2.0 *)
+#[export]
+HB.instance Definition _ := GRing.isNmodule.Build nat addnA addnC add0n.
+
+#[export]
+HB.instance Definition _ := GRing.Nmodule_isComSemiRing.Build nat
+  mulnA mulnC mul1n mulnDl mul0n erefl.
+
+#[export]
+HB.instance Definition _ (V : nmodType) (x : V) :=
+  GRing.isSemiAdditive.Build nat V (GRing.natmul x) (mulr0n x, mulrnDr x).
+
+#[export]
+HB.instance Definition _ (R : semiRingType) :=
+  GRing.isMultiplicative.Build nat R (GRing.natmul 1) (natrM R, mulr1n 1).
+(* end *)
+
+#[export]
+HB.instance Definition _ := Countable.copy N (can_type nat_of_binK).
+
+#[export]
+HB.instance Definition _ := GRing.isNmodule.Build N
+  Nplus_assoc Nplus_comm Nplus_0_l.
+
+#[export]
+HB.instance Definition _ := GRing.Nmodule_isComSemiRing.Build N
+  Nmult_assoc Nmult_comm Nmult_1_l Nmult_plus_distr_r N.mul_0_l isT.
+
+Fact bin_of_nat_is_semi_additive : semi_additive bin_of_nat.
+Proof. by split=> //= m n; rewrite /GRing.add /=; lia. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isSemiAdditive.Build nat N bin_of_nat
+  bin_of_nat_is_semi_additive.
+
+Fact nat_of_bin_is_semi_additive : semi_additive nat_of_bin.
+Proof. by split=> //= m n; rewrite /GRing.add /=; lia. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isSemiAdditive.Build N nat nat_of_bin
+  nat_of_bin_is_semi_additive.
+
+Fact bin_of_nat_is_multiplicative : multiplicative bin_of_nat.
+Proof. by split => // m n; rewrite /GRing.mul /=; lia. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isMultiplicative.Build nat N bin_of_nat
+  bin_of_nat_is_multiplicative.
+
+Fact nat_of_bin_is_multiplicative : multiplicative nat_of_bin.
+Proof. exact: can2_rmorphism bin_of_natK nat_of_binK. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isMultiplicative.Build N nat nat_of_bin
+  nat_of_bin_is_multiplicative.
 
 Implicit Types (m n : Z).
 
@@ -121,7 +178,7 @@ HB.instance Definition _ := GRing.isAdditive.Build Z int int_of_Z
   int_of_Z_is_additive.
 
 Fact Z_of_int_is_multiplicative : multiplicative Z_of_int.
-Proof. by split => // n m; rewrite !Z_of_intE rmorphM. Qed.
+Proof. by split => // m n; rewrite !Z_of_intE rmorphM. Qed.
 
 #[export]
 HB.instance Definition _ := GRing.isMultiplicative.Build int Z Z_of_int
@@ -134,8 +191,53 @@ Proof. exact: can2_rmorphism Z_of_intK int_of_ZK. Qed.
 HB.instance Definition _ := GRing.isMultiplicative.Build Z int int_of_Z
   int_of_Z_is_multiplicative.
 
+Fact Z_of_nat_is_semi_additive : semi_additive Z.of_nat.
+Proof. by split=> //= m n; rewrite /GRing.add /=; lia. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isSemiAdditive.Build nat Z Z.of_nat
+  Z_of_nat_is_semi_additive.
+
+Fact Z_of_nat_is_multiplicative : multiplicative Z.of_nat.
+Proof. by split => // m n; rewrite /GRing.mul /=; lia. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isMultiplicative.Build nat Z Z.of_nat
+  Z_of_nat_is_multiplicative.
+
+Fact Z_of_N_is_semi_additive : semi_additive Z.of_N.
+Proof. by split=> //= m n; rewrite /GRing.add /=; lia. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isSemiAdditive.Build N Z Z.of_N
+  Z_of_N_is_semi_additive.
+
+Fact Z_of_N_is_multiplicative : multiplicative Z.of_N.
+Proof. by split => // m n; rewrite /GRing.mul /=; lia. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isMultiplicative.Build N Z Z.of_N
+  Z_of_N_is_multiplicative.
+
+Fact Posz_is_semi_additive : semi_additive Posz.
+Proof. by []. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isSemiAdditive.Build nat int Posz
+  Posz_is_semi_additive.
+
+Fact Posz_is_multiplicative : multiplicative Posz.
+Proof. by []. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isMultiplicative.Build nat int Posz
+  Posz_is_multiplicative.
+
 Module Exports. HB.reexport. End Exports.
 
-End ZInstances.
+End Instances.
 
-Export ZInstances.Exports.
+Export Instances.Exports.
+
+Lemma natn n : n%:R%R = n :> nat.
+Proof. by elim: n => // n; rewrite mulrS => ->. Qed.
