@@ -53,6 +53,20 @@ HB.instance Definition _ (V : nmodType) (x : V) :=
 #[export]
 HB.instance Definition _ (R : semiRingType) :=
   GRing.isMultiplicative.Build nat R (GRing.natmul 1) (natrM R, mulr1n 1).
+
+Fact Posz_is_semi_additive : semi_additive Posz.
+Proof. by []. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isSemiAdditive.Build nat int Posz
+  Posz_is_semi_additive.
+
+Fact Posz_is_multiplicative : multiplicative Posz.
+Proof. by []. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isMultiplicative.Build nat int Posz
+  Posz_is_multiplicative.
 (* end *)
 
 #[export]
@@ -219,25 +233,8 @@ Proof. by split => // m n; rewrite /GRing.mul /=; lia. Qed.
 HB.instance Definition _ := GRing.isMultiplicative.Build N Z Z.of_N
   Z_of_N_is_multiplicative.
 
-Fact Posz_is_semi_additive : semi_additive Posz.
-Proof. by []. Qed.
-
-#[export]
-HB.instance Definition _ := GRing.isSemiAdditive.Build nat int Posz
-  Posz_is_semi_additive.
-
-Fact Posz_is_multiplicative : multiplicative Posz.
-Proof. by []. Qed.
-
-#[export]
-HB.instance Definition _ := GRing.isMultiplicative.Build nat int Posz
-  Posz_is_multiplicative.
-
 Module Exports. HB.reexport. End Exports.
 
 End Instances.
 
 Export Instances.Exports.
-
-Lemma natn n : n%:R%R = n :> nat.
-Proof. by elim: n => // n; rewrite mulrS => ->. Qed.

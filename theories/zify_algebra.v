@@ -17,6 +17,10 @@ Local Delimit Scope Z_scope with Z.
 
 Import Order.Theory GRing.Theory Num.Theory SsreflectZifyInstances.
 
+(* TODO: remove natn below when we drop support for MathComp 2.0 *)
+Local Lemma natn n : n%:R%R = n :> nat.
+Proof. by elim: n => // n; rewrite mulrS => ->. Qed.
+
 (******************************************************************************)
 (* nat                                                                        *)
 (******************************************************************************)
