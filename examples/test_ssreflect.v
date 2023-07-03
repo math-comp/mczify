@@ -63,6 +63,8 @@ Proof. zify_op; reflexivity. Qed.
 Fact test_dual_max_bool (b1 b2 : bool^d) : Order.dual_max b1 b2 = b1 && b2.
 Proof. zify_op; reflexivity. Qed.
 
+(* FIXME: meet and join below are broken but the tests pass because they are  *)
+(* convertible anyway.                                                        *)
 Fact test_meet_bool b1 b2 : (b1 `&` b2)%O = b1 && b2.
 Proof. zify_op; reflexivity. Qed.
 
@@ -75,17 +77,17 @@ Proof. zify_op; reflexivity. Qed.
 Fact test_dual_join_bool (b1 b2 : bool^d) : (b1 `|^d` b2)%O = b1 && b2.
 Proof. zify_op; reflexivity. Qed.
 
-Fact test_bottom_bool : 0%O = false :> bool.
+Fact test_bottom_bool : \bot%O = false :> bool.
 Proof. zify_op; reflexivity. Qed.
 
-Fact test_top_bool : 1%O = true :> bool.
+Fact test_top_bool : \top%O = true :> bool.
 Proof. zify_op; reflexivity. Qed.
 
 (* FIXME: Notations 0^d and 1^d are broken. *)
-Fact test_dual_bottom_bool : 0%O = true :> bool^d.
+Fact test_dual_bottom_bool : \bot%O = true :> bool^d.
 Proof. zify_op; reflexivity. Qed.
 
-Fact test_dual_top_bool : 1%O = false :> bool^d.
+Fact test_dual_top_bool : \top%O = false :> bool^d.
 Proof. zify_op; reflexivity. Qed.
 
 Fact test_sub_bool b1 b2 : (b1 `\` b2)%O = b1 && ~~ b2.
@@ -235,7 +237,7 @@ Fact test_dual_join_nat (n m : nat^d) :
   Z.of_nat (n `|^d` m)%O = Z.min (Z.of_nat n) (Z.of_nat m).
 Proof. zify_op; reflexivity. Qed.
 
-Fact test_bottom_nat : Z.of_nat 0%O = 0%Z.
+Fact test_bottom_nat : Z.of_nat \bot%O = 0%Z.
 Proof. zify_op; reflexivity. Qed.
 
 (******************************************************************************)
@@ -315,15 +317,14 @@ Fact test_dual_join_natdvd (n m : natdvd^d) :
   Z.of_nat (n `|` m)%O = Z.gcd (Z.of_nat n) (Z.of_nat m).
 Proof. zify_op; reflexivity. Qed.
 
-Fact test_bottom_natdvd : Z.of_nat (0%O : natdvd) = 1%Z.
+Fact test_bottom_natdvd : Z.of_nat (\bot%O : natdvd) = 1%Z.
 Proof. zify_op; reflexivity. Qed.
 
-Fact test_top_natdvd : Z.of_nat (1%O : natdvd) = 0%Z.
+Fact test_top_natdvd : Z.of_nat (\top%O : natdvd) = 0%Z.
 Proof. zify_op; reflexivity. Qed.
 
-(* FIXME: Notations 0^d and 1^d are broken. *)
-Fact test_dual_bottom_natdvd : Z.of_nat (0%O : natdvd^d) = 0%Z.
+Fact test_dual_bottom_natdvd : Z.of_nat (\bot^d%O : natdvd^d) = 0%Z.
 Proof. zify_op; reflexivity. Qed.
 
-Fact test_dual_top_natdvd : Z.of_nat (1%O : natdvd^d) = 1%Z.
+Fact test_dual_top_natdvd : Z.of_nat (\top^d%O : natdvd^d) = 1%Z.
 Proof. zify_op; reflexivity. Qed.
