@@ -17,6 +17,86 @@ Local Delimit Scope Z_scope with Z.
 
 Import Order.Theory GRing.Theory Num.Theory SsreflectZifyInstances.
 
+(* TODO: remove natn below when we drop support for MathComp 2.0 *)
+Local Lemma natn n : n%:R%R = n :> nat.
+Proof. by elim: n => // n; rewrite mulrS => ->. Qed.
+
+(******************************************************************************)
+(* nat                                                                        *)
+(******************************************************************************)
+
+#[global]
+Instance Op_nat_0 : CstOp (0%R : nat) := ZifyInst.Op_O.
+Add Zify CstOp Op_nat_0.
+
+#[global]
+Instance Op_nat_add : BinOp (+%R : nat -> nat -> nat) := Op_addn.
+Add Zify BinOp Op_nat_add.
+
+#[global]
+Instance Op_nat_1 : CstOp (1%R : nat) := { TCst := 1%Z; TCstInj := erefl }.
+Add Zify CstOp Op_nat_1.
+
+#[global]
+Instance Op_nat_mul : BinOp ( *%R : nat -> nat -> nat) := Op_muln.
+Add Zify BinOp Op_nat_mul.
+
+Fact Op_nat_natmul_subproof (n m : nat) :
+  Z.of_nat (n *+ m)%R = (Z.of_nat n * Z.of_nat m)%Z.
+Proof. by rewrite raddfMn -mulr_natr -[m in RHS]natn rmorph_nat. Qed.
+
+#[global]
+Instance Op_nat_natmul : BinOp (@GRing.natmul _ : nat -> nat -> nat) :=
+  { TBOp := Z.mul; TBOpInj := Op_nat_natmul_subproof }.
+Add Zify BinOp Op_nat_natmul.
+
+Fact Op_nat_exp_subproof (n : nat) (m : nat) :
+  Z_of_nat (n ^+ m)%R = (Z_of_int n ^ Z.of_nat m)%Z.
+Proof. rewrite -Zpower_nat_Z; elim: m => //= m <-; rewrite exprS; lia. Qed.
+
+#[global]
+Instance Op_nat_exp : BinOp (@GRing.exp _ : nat -> nat -> nat) :=
+  { TBOp := Z.pow; TBOpInj := Op_nat_exp_subproof }.
+Add Zify BinOp Op_nat_exp.
+
+(******************************************************************************)
+(* N                                                                          *)
+(******************************************************************************)
+
+#[global]
+Instance Op_N_0 : CstOp (0%R : N) := ZifyInst.Op_N_N0.
+Add Zify CstOp Op_N_0.
+
+#[global]
+Instance Op_N_add : BinOp (+%R : N -> N -> N) := ZifyInst.Op_N_add.
+Add Zify BinOp Op_N_add.
+
+#[global]
+Instance Op_N_1 : CstOp (1%R : N) := { TCst := 1%Z; TCstInj := erefl }.
+Add Zify CstOp Op_N_1.
+
+#[global]
+Instance Op_N_mul : BinOp ( *%R : N -> N -> N) := ZifyInst.Op_N_mul.
+Add Zify BinOp Op_N_mul.
+
+Fact Op_N_natmul_subproof (n : N) (m : nat) :
+  Z.of_N (n *+ m)%R = (Z.of_N n * Z.of_nat m)%Z.
+Proof. by rewrite raddfMn -mulr_natr -[m in RHS]natn rmorph_nat. Qed.
+
+#[global]
+Instance Op_N_natmul : BinOp (@GRing.natmul _ : N -> nat -> N) :=
+  { TBOp := Z.mul; TBOpInj := Op_N_natmul_subproof }.
+Add Zify BinOp Op_N_natmul.
+
+Fact Op_N_exp_subproof (n : N) (m : nat) :
+  Z_of_N (n ^+ m)%R = (Z_of_N n ^ Z.of_nat m)%Z.
+Proof. rewrite -Zpower_nat_Z; elim: m => //= m <-; rewrite exprS; lia. Qed.
+
+#[global]
+Instance Op_N_exp : BinOp (@GRing.exp _ : N -> nat -> N) :=
+  { TBOp := Z.pow; TBOpInj := Op_N_exp_subproof }.
+Add Zify BinOp Op_N_exp.
+
 (******************************************************************************)
 (* ssrint                                                                     *)
 (******************************************************************************)
@@ -287,7 +367,7 @@ Instance Op_Z_exp : BinOp (@GRing.exp _ : Z -> nat -> Z) :=
 Add Zify BinOp Op_Z_exp.
 
 #[global]
-Instance Op_unitZ : UnOp (has_quality 1 ZInstances.unitZ : Z -> bool) :=
+Instance Op_unitZ : UnOp (has_quality 1 Instances.unitZ : Z -> bool) :=
   { TUOp x := (x =? 1)%Z || (x =? - 1)%Z; TUOpInj _ := erefl }.
 Add Zify UnOp Op_unitZ.
 
@@ -296,7 +376,7 @@ Instance Op_Z_unit : UnOp (has_quality 1 GRing.unit : Z -> bool) := Op_unitZ.
 Add Zify UnOp Op_Z_unit.
 
 #[global]
-Instance Op_invZ : UnOp ZInstances.invZ := { TUOp := id; TUOpInj _ := erefl }.
+Instance Op_invZ : UnOp Instances.invZ := { TUOp := id; TUOpInj _ := erefl }.
 Add Zify UnOp Op_invZ.
 
 #[global]
@@ -427,6 +507,18 @@ Instance Op_coprimez : BinOp coprimez :=
 Add Zify BinOp Op_coprimez.
 
 Module Exports.
+Add Zify CstOp Op_nat_0.
+Add Zify BinOp Op_nat_add.
+Add Zify CstOp Op_nat_1.
+Add Zify BinOp Op_nat_mul.
+Add Zify BinOp Op_nat_natmul.
+Add Zify BinOp Op_nat_exp.
+Add Zify CstOp Op_N_0.
+Add Zify BinOp Op_N_add.
+Add Zify CstOp Op_N_1.
+Add Zify BinOp Op_N_mul.
+Add Zify BinOp Op_N_natmul.
+Add Zify BinOp Op_N_exp.
 Add Zify InjTyp Inj_int_Z.
 Add Zify UnOp Op_Z_of_int.
 Add Zify UnOp Op_Posz.
