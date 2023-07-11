@@ -95,18 +95,46 @@ HB.instance Definition _ := GRing.isSemiAdditive.Build N nat nat_of_bin
   nat_of_bin_is_semi_additive.
 
 Fact bin_of_nat_is_multiplicative : multiplicative bin_of_nat.
-Proof. by split => // m n; rewrite /GRing.mul /=; lia. Qed.
+Proof. by split=> // m n; rewrite /GRing.mul /=; lia. Qed.
 
 #[export]
 HB.instance Definition _ := GRing.isMultiplicative.Build nat N bin_of_nat
   bin_of_nat_is_multiplicative.
 
 Fact nat_of_bin_is_multiplicative : multiplicative nat_of_bin.
-Proof. exact: can2_rmorphism bin_of_natK nat_of_binK. Qed.
+Proof. by split=> // m n; rewrite /GRing.mul /=; lia. Qed.
 
 #[export]
 HB.instance Definition _ := GRing.isMultiplicative.Build N nat nat_of_bin
   nat_of_bin_is_multiplicative.
+
+Fact N_of_nat_is_semi_additive : semi_additive N.of_nat.
+Proof. by split=> //= m n; rewrite /GRing.add /=; lia. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isSemiAdditive.Build nat N N.of_nat
+  N_of_nat_is_semi_additive.
+
+Fact N_to_nat_is_semi_additive : semi_additive N.to_nat.
+Proof. by split=> //= m n; rewrite /GRing.add /=; lia. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isSemiAdditive.Build N nat N.to_nat
+  N_to_nat_is_semi_additive.
+
+Fact N_of_nat_is_multiplicative : multiplicative N.of_nat.
+Proof. by split=> // m n; rewrite /GRing.mul /=; lia. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isMultiplicative.Build nat N N.of_nat
+  N_of_nat_is_multiplicative.
+
+Fact N_to_nat_is_multiplicative : multiplicative N.to_nat.
+Proof. by split=> // m n; rewrite /GRing.mul /=; lia. Qed.
+
+#[export]
+HB.instance Definition _ := GRing.isMultiplicative.Build N nat N.to_nat
+  N_to_nat_is_multiplicative.
 
 Implicit Types (m n : Z).
 
