@@ -4,5 +4,6 @@ examples/zagier.v
 examples/test_ssreflect.v
 examples/test_algebra.v
 
+-R theories mathcomp.zify
 -I .
 -arg -w -arg -notation-overridden

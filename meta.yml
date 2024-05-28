@@ -71,7 +71,13 @@ dependencies:
   description: |-
     [MathComp](https://math-comp.github.io) algebra
 
+test_target: test-suite
 namespace: mathcomp.zify
+
+action_appendix: |2-
+            export: 'OPAMWITHTEST'
+          env:
+            OPAMWITHTEST: true
 
 documentation: |-
   ## File contents
