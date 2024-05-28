@@ -17,6 +17,7 @@ for goals stated with the definitions of the Mathematical Components library
 by extending the zify tactic."""
 
 build: [make "-j%{jobs}%"]
+run-test: [make "-j%{jobs}%" "test-suite"]
 install: [make "install"]
 depends: [
   "coq" {>= "8.16"}
