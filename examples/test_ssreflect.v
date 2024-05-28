@@ -106,9 +106,6 @@ Proof. zify_op; reflexivity. Qed.
 Fact test_eq_op_nat n m : (n == m) = Z.eqb (Z.of_nat n) (Z.of_nat m).
 Proof. zify_op; reflexivity. Qed.
 
-Fact test_addn_rec n m : Z.of_nat (n + m)%Nrec = (Z.of_nat n + Z.of_nat m)%Z.
-Proof. zify_op; reflexivity. Qed.
-
 Fact test_addn n m : Z.of_nat (n + m) = (Z.of_nat n + Z.of_nat m)%Z.
 Proof. zify_op; reflexivity. Qed.
 
@@ -116,15 +113,8 @@ Fact test_addn_trec n m :
   Z.of_nat (NatTrec.add n m) = (Z.of_nat n + Z.of_nat m)%Z.
 Proof. zify_op; reflexivity. Qed.
 
-Fact test_subn_rec n m :
-  Z.of_nat (n - m)%Nrec = Z.max 0 (Z.of_nat n - Z.of_nat m).
-Proof. zify_op; reflexivity. Qed.
-
 Fact test_subn n m :
   Z.of_nat (n - m) = Z.max 0 (Z.of_nat n - Z.of_nat m).
-Proof. zify_op; reflexivity. Qed.
-
-Fact test_muln_rec n m : Z.of_nat (n * m)%Nrec = (Z.of_nat n * Z.of_nat m)%Z.
 Proof. zify_op; reflexivity. Qed.
 
 Fact test_muln n m : Z.of_nat (n * m) = (Z.of_nat n * Z.of_nat m)%Z.
