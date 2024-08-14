@@ -341,7 +341,10 @@ Instance Op_Z_mulr : BinOp ( *%R : Z -> Z -> Z) :=
 Add Zify BinOp Op_Z_mulr.
 
 Fact Op_Z_natmul_subproof (n : Z) (m : nat) : (n *+ m)%R = (n * Z.of_nat m)%Z.
-Proof. elim: m => [|m]; rewrite (mulr0n, mulrS); lia. Qed.
+Proof.
+elim: m => [|m]; rewrite (mulr0n, mulrS); first by lia.
+by move=> ->; lia.
+Qed.
 
 #[global]
 Instance Op_Z_natmul : BinOp (@GRing.natmul _ : Z -> nat -> Z) :=
