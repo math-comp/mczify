@@ -1,3 +1,4 @@
+From mathcomp Require all_algebra. (* remove this line when requiring Rocq > 9.1 *)
 From Coq Require Import ZArith ZifyClasses ZifyInst ZifyBool.
 From Coq Require Export Lia.
 From Coq Require Znumtheory.
