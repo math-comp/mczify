@@ -1,4 +1,3 @@
-From mathcomp Require all_algebra. (* remove this line when requiring Rocq > 9.1 *)
 From Coq Require Import ZArith.
 
 From HB Require Import structures.
