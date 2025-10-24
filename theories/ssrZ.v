@@ -1,4 +1,4 @@
-From Coq Require Import ZArith.
+From Stdlib Require Import ZArith.
 
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq path.
