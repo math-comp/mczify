@@ -369,24 +369,28 @@ Add Zify BinOp Op_modZ.
 Fact divZ_eq m d : m = (divZ m d * d + modZ m d)%Z.
 Proof. rewrite /modZ; lia. Qed.
 
+(* TODO: remove when dropping the support for MC 2.3 *)
+Fact leq_divM m d : m %/ d * d <= m.
+Proof. by rewrite [leqRHS](divn_eq m d) leq_addr. Qed.
+
 Fact modZ_ge0 m d : d <> 0%Z -> (0 <= modZ m d)%Z.
 Proof.
 by move: d m => [] // d [] // m _; rewrite /modZ /divZ [Z.abs_nat _]/=;
-  move: (leq_trunc_div (Pos.to_nat m) (Pos.to_nat d));
+  move: (leq_divM (Pos.to_nat m) (Pos.to_nat d));
   move: (@ltn_ceil (Pos.to_nat m).-1 (Pos.to_nat d)); lia.
 Qed.
 
 Fact ltz_pmodZ m d : (0 < d)%Z -> (modZ m d < d)%Z.
 Proof.
 by move: d m => [] // d [] // m _; rewrite /modZ /divZ [Z.abs_nat _]/=;
-  move: (leq_trunc_div (Pos.to_nat m).-1 (Pos.to_nat d));
+  move: (leq_divM (Pos.to_nat m).-1 (Pos.to_nat d));
   move: (@ltn_ceil (Pos.to_nat m) (Pos.to_nat d)); lia.
 Qed.
 
 Fact ltz_nmodZ m d : (d < 0)%Z -> (modZ m d < - d)%Z.
 Proof.
-move: d m => [] // d [] // m _; rewrite /modZ /divZ [Z.abs_nat _]/=;
-  move: (leq_trunc_div (Pos.to_nat m).-1 (Pos.to_nat d));
+by move: d m => [] // d [] // m _; rewrite /modZ /divZ [Z.abs_nat _]/=;
+  move: (leq_divM (Pos.to_nat m).-1 (Pos.to_nat d));
   move: (@ltn_ceil (Pos.to_nat m) (Pos.to_nat d)); lia.
 Qed.
 
