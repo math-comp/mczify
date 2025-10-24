@@ -155,10 +155,6 @@ Instance Op_eq_op_nat : BinOp (eq_op : rel nat) := Op_eqn.
 Add Zify BinOp Op_eq_op_nat.
 
 #[global]
-Instance Op_addn_rec : BinOp addn_rec := Op_plus.
-Add Zify BinOp Op_addn_rec.
-
-#[global]
 Instance Op_addn : BinOp addn := Op_plus.
 Add Zify BinOp Op_addn.
 
@@ -168,16 +164,8 @@ Instance Op_addn_trec : BinOp NatTrec.add :=
 Add Zify BinOp Op_addn_trec.
 
 #[global]
-Instance Op_subn_rec : BinOp subn_rec := Op_sub.
-Add Zify BinOp Op_subn_rec.
-
-#[global]
 Instance Op_subn : BinOp subn := Op_sub.
 Add Zify BinOp Op_subn.
-
-#[global]
-Instance Op_muln_rec : BinOp muln_rec := Op_mul.
-Add Zify BinOp Op_muln_rec.
 
 #[global]
 Instance Op_muln : BinOp muln := Op_mul.
@@ -237,12 +225,8 @@ Fact Op_expn_subproof n m : Z.of_nat (n ^ m) = (Z.of_nat n ^ Z.of_nat m)%Z.
 Proof. rewrite -Zpower_nat_Z; elim: m => //= m <-; rewrite expnS; lia. Qed.
 
 #[global]
-Instance Op_expn_rec : BinOp expn_rec :=
+Instance Op_expn : BinOp expn :=
   { TBOp := Z.pow; TBOpInj := Op_expn_subproof }.
-Add Zify BinOp Op_expn_rec.
-
-#[global]
-Instance Op_expn : BinOp expn := Op_expn_rec.
 Add Zify BinOp Op_expn.
 
 #[global]
@@ -272,7 +256,7 @@ Instance Op_nat_of_bin : UnOp nat_of_bin :=
 Add Zify UnOp Op_nat_of_bin.
 
 Fact pos_of_natE n m : pos_of_nat n m = Pos.of_succ_nat (n * 2 - m).
-Proof. elim: n m => // n IHn [|[|m]] /=; rewrite IHn; lia. Qed.
+Proof. by elim: n m => // n IHn [|[|m]] /=; rewrite IHn; lia. Qed.
 
 #[global]
 Instance Op_pos_of_nat : BinOp pos_of_nat :=
@@ -625,12 +609,9 @@ Add Zify BinOp Op_bool_sub.
 Add Zify UnOp Op_bool_compl.
 Add Zify BinOp Op_eqn.
 Add Zify BinOp Op_eq_op_nat.
-Add Zify BinOp Op_addn_rec.
 Add Zify BinOp Op_addn.
 Add Zify BinOp Op_addn_trec.
-Add Zify BinOp Op_subn_rec.
 Add Zify BinOp Op_subn.
-Add Zify BinOp Op_muln_rec.
 Add Zify BinOp Op_muln.
 Add Zify BinOp Op_muln_trec.
 Add Zify BinOp Op_leq.
@@ -642,7 +623,6 @@ Add Zify BinOp Op_maxn.
 Add Zify UnOp Op_nat_of_bool.
 Add Zify UnOp Op_double.
 Add Zify UnOp Op_double_trec.
-Add Zify BinOp Op_expn_rec.
 Add Zify BinOp Op_expn.
 Add Zify BinOp Op_expn_trec.
 Add Zify BinOp Op_eq_op_N.
