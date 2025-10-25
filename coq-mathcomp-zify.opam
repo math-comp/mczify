@@ -2,7 +2,7 @@
 # Follow the instructions on https://github.com/coq-community/templates to regenerate.
 
 opam-version: "2.0"
-maintainer: "kazuhiko.sakaguchi@inria.fr"
+maintainer: "kazuhiko.sakaguchi@ens-lyon.fr"
 version: "dev"
 
 homepage: "https://github.com/math-comp/mczify"
@@ -20,8 +20,8 @@ build: [make "-j%{jobs}%"]
 run-test: [make "-j%{jobs}%" "test-suite"]
 install: [make "install"]
 depends: [
-  "coq" {>= "8.16"}
-  "coq-mathcomp-ssreflect" {>= "2.0"}
+  "coq" {>= "8.18"}
+  "coq-mathcomp-ssreflect" {>= "2.3"}
   "coq-mathcomp-algebra" 
 ]
 

@@ -17,7 +17,7 @@ authors:
 - name: Kazuhiko Sakaguchi
   initial: true
 
-opam-file-maintainer: kazuhiko.sakaguchi@inria.fr
+opam-file-maintainer: kazuhiko.sakaguchi@ens-lyon.fr
 
 license:
   fullname: CeCILL-B Free Software License Agreement
@@ -25,34 +25,12 @@ license:
   file: CeCILL-B
 
 supported_coq_versions:
-  text: 8.16 or later
-  opam: '{>= "8.16"}'
+  text: 8.18 or later
+  opam: '{>= "8.18"}'
 
 tested_coq_nix_versions:
 
 tested_coq_opam_versions:
-- version: '2.0.0-coq-8.16'
-  repo: 'mathcomp/mathcomp'
-- version: '2.0.0-coq-8.17'
-  repo: 'mathcomp/mathcomp'
-- version: '2.0.0-coq-8.18'
-  repo: 'mathcomp/mathcomp'
-- version: '2.1.0-coq-8.16'
-  repo: 'mathcomp/mathcomp'
-- version: '2.1.0-coq-8.17'
-  repo: 'mathcomp/mathcomp'
-- version: '2.1.0-coq-8.18'
-  repo: 'mathcomp/mathcomp'
-- version: '2.2.0-coq-8.16'
-  repo: 'mathcomp/mathcomp'
-- version: '2.2.0-coq-8.17'
-  repo: 'mathcomp/mathcomp'
-- version: '2.2.0-coq-8.18'
-  repo: 'mathcomp/mathcomp'
-- version: '2.2.0-coq-8.19'
-  repo: 'mathcomp/mathcomp'
-- version: '2.2.0-coq-8.20'
-  repo: 'mathcomp/mathcomp'
 - version: '2.3.0-coq-8.18'
   repo: 'mathcomp/mathcomp'
 - version: '2.3.0-coq-8.19'
@@ -67,8 +45,6 @@ tested_coq_opam_versions:
   repo: 'mathcomp/mathcomp'
 - version: '2.4.0-rocq-prover-dev'
   repo: 'mathcomp/mathcomp'
-- version: 'coq-8.20'
-  repo: 'mathcomp/mathcomp-dev'
 - version: 'rocq-prover-9.0'
   repo: 'mathcomp/mathcomp-dev'
 - version: 'rocq-prover-dev'
@@ -77,9 +53,9 @@ tested_coq_opam_versions:
 dependencies:
 - opam:
     name: coq-mathcomp-ssreflect
-    version: '{>= "2.0"}'
+    version: '{>= "2.3"}'
   description: |-
-    [MathComp](https://math-comp.github.io) ssreflect 2.0 or later
+    [MathComp](https://math-comp.github.io) ssreflect 2.3 or later
 - opam:
     name: coq-mathcomp-algebra
   description: |-
