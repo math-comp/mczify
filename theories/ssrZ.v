@@ -37,38 +37,6 @@ Qed.
 
 Module Instances.
 
-(* Instances taken from math-comp/math-comp#1031, authored by Pierre Roux *)
-(* TODO: remove them when we drop support for MathComp 2.0 *)
-#[export]
-HB.instance Definition _ := GRing.isNmodule.Build nat addnA addnC add0n.
-
-#[export]
-HB.instance Definition _ := GRing.Nmodule_isComSemiRing.Build nat
-  mulnA mulnC mul1n mulnDl mul0n erefl.
-
-#[export]
-HB.instance Definition _ (V : nmodType) (x : V) :=
-  GRing.isSemiAdditive.Build nat V (GRing.natmul x) (mulr0n x, mulrnDr x).
-
-#[export]
-HB.instance Definition _ (R : semiRingType) :=
-  GRing.isMultiplicative.Build nat R (GRing.natmul 1) (natrM R, mulr1n 1).
-
-Fact Posz_is_semi_additive : semi_additive Posz.
-Proof. by []. Qed.
-
-#[export]
-HB.instance Definition _ := GRing.isSemiAdditive.Build nat int Posz
-  Posz_is_semi_additive.
-
-Fact Posz_is_multiplicative : multiplicative Posz.
-Proof. by []. Qed.
-
-#[export]
-HB.instance Definition _ := GRing.isMultiplicative.Build nat int Posz
-  Posz_is_multiplicative.
-(* end *)
-
 #[export]
 HB.instance Definition _ := Countable.copy N (can_type nat_of_binK).
 
