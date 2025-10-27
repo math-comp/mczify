@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: coq-community/docker-coq-action@v1
         with:
-          opam_file: 'coq-mathcomp-zify.opam'
+          opam_file: 'rocq-mathcomp-zify.opam'
           custom_image: ${{ matrix.image }}
           export: 'OPAMWITHTEST'
         env:

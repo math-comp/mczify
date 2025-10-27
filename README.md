@@ -35,7 +35,7 @@ is via [OPAM](https://opam.ocaml.org/doc/Install.html):
 
 ```shell
 opam repo add coq-released https://coq.inria.fr/opam/released
-opam install coq-mathcomp-zify
+opam install rocq-mathcomp-zify
 ```
 
 To instead build and install manually, do:

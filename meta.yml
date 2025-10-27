@@ -1,7 +1,7 @@
 ---
 fullname: Mczify
 shortname: mczify
-opam_name: coq-mathcomp-zify
+opam_name: rocq-mathcomp-zify
 organization: math-comp
 action: true
 
