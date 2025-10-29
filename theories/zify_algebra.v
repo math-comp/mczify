@@ -1,5 +1,5 @@
-From Coq Require Import ZArith ZifyClasses ZifyBool.
-From Coq Require Export Lia.
+From Stdlib Require Import ZArith ZifyClasses ZifyBool.
+From Stdlib Require Export Lia.
 
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq path.
 From mathcomp Require Import div choice fintype tuple finfun bigop finset prime.

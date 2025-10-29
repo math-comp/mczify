@@ -21,11 +21,11 @@ by extending the zify tactic.
 - Author(s):
   - Kazuhiko Sakaguchi (initial)
 - License: [CeCILL-B Free Software License Agreement](CeCILL-B)
-- Compatible Coq versions: 8.16 or later
+- Compatible Rocq/Coq versions: 8.18 or later
 - Additional dependencies:
-  - [MathComp](https://math-comp.github.io) ssreflect 2.0 or later
+  - [MathComp](https://math-comp.github.io) ssreflect 2.3 or later
   - [MathComp](https://math-comp.github.io) algebra
-- Coq namespace: `mathcomp.zify`
+- Rocq/Coq namespace: `mathcomp.zify`
 - Related publication(s): none
 
 ## Building and installation instructions
@@ -35,7 +35,7 @@ is via [OPAM](https://opam.ocaml.org/doc/Install.html):
 
 ```shell
 opam repo add coq-released https://coq.inria.fr/opam/released
-opam install coq-mathcomp-zify
+opam install rocq-mathcomp-zify
 ```
 
 To instead build and install manually, do:

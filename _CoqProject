@@ -1,2 +1,3 @@
 -R theories mathcomp.zify
+-arg -w -arg -redundant-canonical-projection
 -arg -w -arg -notation-overridden
