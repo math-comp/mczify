@@ -2,6 +2,7 @@ From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq path.
 From mathcomp Require Import div choice fintype tuple finfun bigop finset prime.
 From mathcomp Require Import binomial ssralg countalg ssrnum ssrint rat intdiv.
 From mathcomp Require Import zify.
+Set SsrOldRewriteGoalsOrder.  (* change Set to Unset when porting the file, then remove the line when requiring MathComp >= 2.6 *)
 
 Set Implicit Arguments.
 Unset Strict Implicit.
