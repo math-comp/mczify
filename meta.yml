@@ -9,7 +9,7 @@ synopsis: >-
   Micromega tactics for Mathematical Components
 
 description: |-
-  This small library enables the use of the Micromega arithmetic solvers of Coq
+  This small library enables the use of the Micromega arithmetic solvers of Rocq
   for goals stated with the definitions of the Mathematical Components library
   by extending the zify tactic.
 
@@ -25,20 +25,12 @@ license:
   file: CeCILL-B
 
 supported_coq_versions:
-  text: 8.18 or later
-  opam: '{>= "8.18"}'
+  text: 8.20 or later
+  opam: '{>= "8.20"}'
 
 tested_coq_nix_versions:
 
 tested_coq_opam_versions:
-- version: '2.3.0-coq-8.18'
-  repo: 'mathcomp/mathcomp'
-- version: '2.3.0-coq-8.19'
-  repo: 'mathcomp/mathcomp'
-- version: '2.3.0-coq-8.20'
-  repo: 'mathcomp/mathcomp'
-- version: '2.4.0-coq-8.19'
-  repo: 'mathcomp/mathcomp'
 - version: '2.4.0-coq-8.20'
   repo: 'mathcomp/mathcomp'
 - version: '2.4.0-rocq-prover-9.0'
@@ -60,12 +52,12 @@ tested_coq_opam_versions:
 
 dependencies:
 - opam:
-    name: coq-mathcomp-ssreflect
-    version: '{>= "2.3"}'
+    name: rocq-mathcomp-ssreflect
+    version: '{>= "2.4"}'
   description: |-
-    [MathComp](https://math-comp.github.io) ssreflect 2.3 or later
+    [MathComp](https://math-comp.github.io) ssreflect 2.4 or later
 - opam:
-    name: coq-mathcomp-algebra
+    name: rocq-mathcomp-algebra
   description: |-
     [MathComp](https://math-comp.github.io) algebra
 
@@ -80,9 +72,9 @@ action_appendix: |2-
 documentation: |-
   ## File contents
 
-  - `zify_ssreflect.v`: Z-ification instances for the `coq-mathcomp-ssreflect`
+  - `zify_ssreflect.v`: Z-ification instances for the `rocq-mathcomp-ssreflect`
     library
-  - `zify_algebra.v`: Z-ification instances for the `coq-mathcomp-algebra`
+  - `zify_algebra.v`: Z-ification instances for the `rocq-mathcomp-algebra`
     library
   - `zify.v`: re-exports all the Z-ification instances
   - `ssrZ.v`: provides a minimal facility for reasoning about `Z` and relating
