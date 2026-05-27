@@ -12,7 +12,7 @@ Follow the instructions on https://github.com/coq-community/templates to regener
 
 
 
-This small library enables the use of the Micromega arithmetic solvers of Coq
+This small library enables the use of the Micromega arithmetic solvers of Rocq
 for goals stated with the definitions of the Mathematical Components library
 by extending the zify tactic.
 
@@ -21,9 +21,9 @@ by extending the zify tactic.
 - Author(s):
   - Kazuhiko Sakaguchi (initial)
 - License: [CeCILL-B Free Software License Agreement](CeCILL-B)
-- Compatible Rocq/Coq versions: 8.18 or later
+- Compatible Rocq/Coq versions: 8.20 or later
 - Additional dependencies:
-  - [MathComp](https://math-comp.github.io) ssreflect 2.3 or later
+  - [MathComp](https://math-comp.github.io) ssreflect 2.4 or later
   - [MathComp](https://math-comp.github.io) algebra
 - Rocq/Coq namespace: `mathcomp.zify`
 - Related publication(s): none
@@ -54,9 +54,9 @@ make install
 
 ## File contents
 
-- `zify_ssreflect.v`: Z-ification instances for the `coq-mathcomp-ssreflect`
+- `zify_ssreflect.v`: Z-ification instances for the `rocq-mathcomp-ssreflect`
   library
-- `zify_algebra.v`: Z-ification instances for the `coq-mathcomp-algebra`
+- `zify_algebra.v`: Z-ification instances for the `rocq-mathcomp-algebra`
   library
 - `zify.v`: re-exports all the Z-ification instances
 - `ssrZ.v`: provides a minimal facility for reasoning about `Z` and relating

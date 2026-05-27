@@ -46,7 +46,7 @@ HB.instance Definition _ := GRing.isNmodule.Build N
   Nplus_assoc Nplus_comm Nplus_0_l.
 
 #[export]
-HB.instance Definition _ := GRing.Nmodule_isComSemiRing.Build N
+HB.instance Definition _ := GRing.Nmodule_isComNzSemiRing.Build N
   Nmult_assoc Nmult_comm Nmult_1_l Nmult_plus_distr_r N.mul_0_l isT.
 
 Fact bin_of_nat_is_semi_additive : semi_additive bin_of_nat.
@@ -121,7 +121,7 @@ HB.instance Definition _ := GRing.isZmodule.Build Z
   Zplus_assoc Zplus_comm Zplus_0_l Zplus_opp_l.
 
 #[export]
-HB.instance Definition _ := GRing.Zmodule_isComRing.Build Z
+HB.instance Definition _ := GRing.Zmodule_isComNzRing.Build Z
   Zmult_assoc Zmult_comm Zmult_1_l Zmult_plus_distr_l isT.
 
 Definition unitZ := [qualify a n : Z | (n == Z.pos xH) || (n == Z.neg xH)].
@@ -137,7 +137,7 @@ Fact invZ_out : {in [predC unitZ], invZ =1 id}.
 Proof. exact. Qed.
 
 #[export]
-HB.instance Definition _ := GRing.ComRing_hasMulInverse.Build Z
+HB.instance Definition _ := GRing.ComNzRing_hasMulInverse.Build Z
   mulVZ unitZPl invZ_out.
 
 Fact idomain_axiomZ m n : (m * n = 0)%R -> (m == 0%R) || (n == 0%R).
