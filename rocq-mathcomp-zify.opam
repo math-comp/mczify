@@ -20,7 +20,8 @@ build: [make "-j%{jobs}%"]
 run-test: [make "-j%{jobs}%" "test-suite"]
 install: [make "install"]
 depends: [
-  "coq" {>= "8.20"}
+  "rocq-core" {>= "9.0"}
+  "rocq-stdlib" 
   "rocq-mathcomp-ssreflect" {>= "2.4"}
   "rocq-mathcomp-algebra" 
 ]

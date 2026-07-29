@@ -9,7 +9,7 @@ KNOWNFILES   := Makefile Make Make.test-suite
 
 .DEFAULT_GOAL := invoke-coqmakefile
 
-COQMAKEFILE       = $(COQBIN)coq_makefile
+COQMAKEFILE       = $(COQBIN)rocq makefile
 COQMAKE           = $(MAKE) --no-print-directory -f Makefile.coq
 COQMAKE_TESTSUITE = $(MAKE) --no-print-directory -f Makefile.test-suite.coq
 
